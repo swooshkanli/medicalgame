@@ -1415,7 +1415,7 @@ const casesDB = [
                 turn: 5, // 4. Yanlışta açılır
                 title: "Anamnez #2",
                 text: "Detaylı sorgulamada hasta son aylarda buzdolabından sürekli buz çıkarıp kıtır kıtır çiğnediğini ve baharatlı yiyecekler yediğinde dilinin çok yandığını ekliyor.",
-                isAlert: false
+                isAlert: true
             },
             {
                 turn: 7, // 6. Yanlışta açılır (Son Şans!)
