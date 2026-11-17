@@ -1743,3 +1743,169 @@ body {
     text-align: center;
 }
 
+
+
+/* ==========================================
+   MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE TASARIM)
+   ========================================== */
+@media screen and (max-width: 950px) {
+    /* 1. Sabit 100vh ekran kilidini kaldır, dikey doğal kaydırmaya izin ver */
+    body {
+        height: auto !important;
+        min-height: 100dvh !important;
+        align-items: flex-start !important;
+        padding: 8px !important;
+        overflow-y: auto !important;
+    }
+
+    /* 2. Yan yana olan panelleri alt alta (Sol Panel üstte, Matris altta) diz */
+    .game-container {
+        flex-direction: column !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: calc(100dvh - 16px) !important;
+        overflow: visible !important;
+        border-radius: 10px !important;
+    }
+
+    /* 3. ÜST PANEL (Klinik İpuçları ve Arama Çubuğu) */
+    .left-panel {
+        border-right: none !important;
+        border-bottom: 2px solid #2a2f3a !important;
+        padding: 16px 14px !important;
+        width: 100% !important;
+    }
+
+    .panel-header {
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .panel-header h2 {
+        font-size: 1.3rem !important;
+    }
+
+    .status-badges {
+        width: 100% !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+    }
+
+    /* Vaka seçici butonlar telefonda taşarsa yatay kaydırılabilsin */
+    .case-selector {
+        overflow-x: auto !important;
+        max-width: calc(100% - 85px) !important;
+        padding: 4px !important;
+    }
+
+    .case-btn {
+        min-width: 28px !important;
+        height: 28px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .badge {
+        font-size: 1rem !important;
+        padding: 6px 12px !important;
+        min-width: 68px !important;
+    }
+
+    /* İpucu kutuları mobilde sıkışmasın, kendi içinde rahat okunsun */
+    .clinical-file {
+        max-height: none !important;
+        overflow: visible !important;
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        padding: 4px 0 !important;
+        margin: 0 !important;
+        gap: 10px !important;
+    }
+
+    .lore-entry {
+        padding: 12px !important;
+        font-size: 0.88rem !important;
+    }
+
+    /* Arama ve Tahmin Butonu */
+    .input-wrapper {
+        margin-top: 14px !important;
+    }
+
+    #guess-input {
+        padding: 12px !important;
+        font-size: 16px !important; /* iOS Safari'nin input'a tıklayınca ekranı otomatik zoomlamasını engeller! */
+    }
+
+    #submit-guess {
+        padding: 0 18px !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Tanı Doğrulandı / Vaka Devredildi Barı Mobil Uyumu */
+    .phase-transition-banner {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        text-align: center !important;
+        gap: 12px !important;
+        padding: 14px !important;
+    }
+
+    .next-phase-btn {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    /* 4. ALT PANEL (Tahmin Matrisi) */
+    .right-panel {
+        padding: 16px 10px 28px 10px !important;
+        width: 100% !important;
+        min-height: 280px !important;
+    }
+
+    /* 4 Sütunlu Matrisi Telefon Ekranına Sığdırma */
+    .matrix-header,
+    .guess-row {
+        grid-template-columns: 1.35fr 0.9fr 1.05fr 0.95fr !important;
+        gap: 5px !important;
+    }
+
+    .matrix-header {
+        font-size: 0.72rem !important;
+        min-height: 40px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .header-lock-badge {
+        position: static !important;
+        margin-left: 3px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .header-subtext {
+        font-size: 0.6rem !important;
+    }
+
+    /* 3D Kartların Yükseklik ve Font Ayarı */
+    .cell-3d-wrapper {
+        height: 64px !important;
+        min-height: 64px !important;
+    }
+
+    .cell-face {
+        padding: 6px 4px !important;
+        font-size: 0.72rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .cell-name {
+        padding-left: 4px !important;
+        word-spacing: 1px !important;
+    }
+
+    .sub-mech {
+        font-size: 0.62rem !important;
+    }
+}
+
