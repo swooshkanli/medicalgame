@@ -1415,11 +1415,11 @@ const casesDB = [
                 turn: 5, // 4. Yanlışta açılır
                 title: "Anamnez #2",
                 text: "Detaylı sorgulamada hasta son aylarda buzdolabından sürekli buz çıkarıp kıtır kıtır çiğnediğini ve baharatlı yiyecekler yediğinde dilinin çok yandığını ekliyor.",
-                isAlert: true
+                isAlert: false
             },
             {
                 turn: 7, // 6. Yanlışta açılır (Son Şans!)
-                title: "Laboratuvar & Spesifik Sonuçlar",
+                title: "Laboratuvar & Spesifik Sonuçlarrrrrrrrrrrrrrr",
                 text: "Laboratuvarda Hb: 8.2 g/dL, MCV: 64 fL, Ferritin: 4 ng/mL olarak sonuçlandı. Baryumlu özofagus grafisinde ve üst GİS endoskopisinde üst özofageal sfinkterin hemen altında, lümeni kısmen daraltan ince, eksantrik yerleşimli mukozal perde izlendi; biyopside malignite saptanmadı.",
                 isAlert: true
             }
