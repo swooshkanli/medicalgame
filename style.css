@@ -1,0 +1,1745 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #0d0f12;
+    color: #e0e0e0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    display: flex;
+    width: 95vw;
+    height: 92vh;
+    background-color: #16191e;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+    overflow: hidden;
+    border: 1px solid #2a2f3a;
+}
+
+/* SOL PANEL */
+.left-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #2a2f3a;
+    padding: 24px;
+    background-color: #13161a;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Başlık ve sayacı dikeyde tam ortalar */
+    border-bottom: 2px solid #00acc1;
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+}
+
+.panel-header h2 {
+    color: #00acc1;
+    font-size: 1.6rem; /* Vaka numarası artık ana başlık olduğu için büyütüldü */
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.sub-header {
+    font-size: 0.75rem;
+    color: #6c7a89;
+    letter-spacing: 1.5px;
+}
+
+.status-badges {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.badge {
+    background: linear-gradient(135deg, #00acc1 0%, #007c91 100%);
+    color: #ffffff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.35);
+    border: 1px solid #4dd0e1;
+}
+
+.patient-id {
+    font-weight: bold;
+    color: #90a4ae;
+    font-size: 0.9rem;
+}
+
+/* Klinik Dosya ve Hikaye Kartları */
+.clinical-file {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-right: 8px;
+}
+
+.lore-entry {
+    background-color: #1e232a;
+    padding: 16px;
+    border-left: 4px solid #00acc1;
+    border-radius: 6px;
+    animation: fadeIn 0.4s ease-out;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+/* Özel Durum: Anamnez Alınamayan / Kritik Hasta Uyarısı */
+.lore-entry.alert {
+    background-color: #2c1518;
+    border-left-color: #ff5252;
+    color: #ffcdd2;
+}
+
+.entry-title {
+    font-size: 0.8rem;
+    color: #00acc1;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.lore-entry.alert .entry-title {
+    color: #ff5252;
+}
+
+/* Arama ve Otomatik Tamamlama */
+.input-wrapper {
+    position: relative;
+    margin-top: 20px;
+}
+
+.autocomplete-items {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background-color: #232830;
+    border: 1px solid #37404e;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 99;
+    margin-bottom: 5px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+}
+
+.autocomplete-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #2c323d;
+    transition: 0.15s;
+}
+
+.autocomplete-item:hover {
+    background-color: #00acc1;
+    color: #fff;
+}
+
+.input-section {
+    display: flex;
+    gap: 10px;
+}
+
+#guess-input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #2e3540;
+    border-radius: 6px;
+    background-color: #1e2229;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+}
+
+#guess-input:focus {
+    border-color: #00acc1;
+}
+
+#submit-guess {
+    padding: 0 28px;
+    background-color: #00acc1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+#submit-guess:hover {
+    background-color: #00838f;
+}
+
+/* SAĞ PANEL: Matris */
+.right-panel {
+    flex: 1.3;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    background-color: #16191e;
+}
+
+/* Sağ Panel Başlıklarını Dikey Ortalama */
+.matrix-header {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #2a2f3a;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #b0bec5;
+    text-align: center;
+    align-items: center; /* ÇÖZÜM: Tek satırlı ve iki satırlı başlıkları dikeyde ortalar */
+    min-height: 48px;    /* Kilitler açıldığında başlık yüksekliğinin çökmesini engeller */
+}
+
+.locked {
+    color: #546e7a;
+}
+
+.unlocked-header {
+    color: #00acc1 !important;
+    animation: pulse 0.5s ease;
+}
+
+.guesses-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+/* Tahmin Satırları ve Renkli Kutular */
+.guess-row {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.cell {
+    padding: 14px 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: break-word;
+    transition: all 0.4s ease;
+}
+
+.cell-name {
+    background-color: #232830;
+    color: #eceff1;
+    justify-content: flex-start;
+    padding-left: 15px;
+    border-left: 3px solid #546e7a;
+}
+
+/* Matris Renk Durumları */
+.cell-green {
+    background-color: #1b5e20;
+    color: #e8f5e9;
+    border: 1px solid #4caf50;
+}
+
+.cell-yellow {
+    background-color: #f57f17;
+    color: #fffde7;
+    border: 1px solid #ffeb3b;
+}
+
+.cell-red {
+    background-color: #b71c1c;
+    color: #ffebee;
+    border: 1px solid #f44336;
+}
+
+.cell-locked {
+    background-color: #1a1d24;
+    color: #455a64;
+    border: 1px dashed #2e3540;
+    font-size: 1.1rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+/* Sol Paneldeki Kilitli İpucu Kutuları */
+.lore-entry.locked-clue {
+    background-color: #161920;
+    border-left: 4px dashed #37474f;
+    color: #546e7a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 16px;
+    user-select: none;
+}
+
+.lore-entry.locked-clue .entry-title {
+    color: #546e7a;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.unlock-countdown {
+    background-color: #1e242d;
+    color: #78909c;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #2c3542;
+}
+
+/* Sağ Panel Sütun Başlıklarındaki Geri Sayım Yazısı */
+.header-subtext {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: normal;
+    color: #78909c;
+    margin-top: 3px;
+}
+
+.unlocked-header .header-subtext {
+    color: #00acc1;
+}
+
+/* Sıradaki Açılacak İpucu Vurgusu (Sarı-Turuncu / Kehribar) */
+.lore-entry.locked-clue.next-up {
+    border-left: 4px dashed #ffa726;
+    background-color: #211d17;
+}
+
+.lore-entry.locked-clue.next-up .entry-title {
+    color: #ffa726;
+}
+
+.lore-entry.locked-clue.next-up .unlock-countdown {
+    background-color: #382a14;
+    color: #ffb74d;
+    border-color: #ffa726;
+}
+
+/* Sağ Panelde Sıradaki Açılacak Sütun Başlığı Vurgusu */
+.next-up-header {
+    color: #ffa726 !important;
+}
+
+.next-up-header .header-subtext {
+    color: #ffb74d !important;
+    font-weight: 600;
+}
+
+/* Otomatik Tamamlamada Zaten Tahmin Edilmiş Öğeler (Grayed Out) */
+.autocomplete-item.already-guessed {
+    color: #546e7a;
+    background-color: #181b20;
+    cursor: not-allowed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none; /* Tıklamayı tamamen engeller */
+}
+
+.guessed-badge {
+    font-size: 0.75rem;
+    background-color: #262b33;
+    color: #78909c;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-style: italic;
+}
+
+/* Sağdaki Yeşil Kutuların Hak Kutusu Gibi Parlaması */
+.cell-green {
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    color: #ffffff;
+    border: 1px solid #66bb6a;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.45);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Sayaç: 2 veya 3 Hak Kalınca Turuncu Parlama (6/8 ve 7/8) */
+.badge.badge-warning {
+    background: linear-gradient(135deg, #fb8c00 0%, #e65100 100%);
+    border-color: #ffb74d;
+    box-shadow: 0 4px 16px rgba(255, 152, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Sayaç: Son 1 Hak Kalınca Kırmızı Parlama + Nabız Efekti (8/8) */
+.badge.badge-danger {
+    background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
+    border-color: #ef5350;
+    box-shadow: 0 0 20px rgba(244, 67, 54, 0.75);
+    animation: dangerPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes dangerPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(244, 67, 54, 0.6);
+    }
+    50% {
+        transform: scale(1.06);
+        box-shadow: 0 0 25px rgba(244, 67, 54, 0.95);
+    }
+}
+
+/* Yanlış Tanının Kendi Kutucuğu: Kırmızı */
+.cell-name.wrong-diagnosis {
+    background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+    color: #fecaca;
+    border: 1px solid #dc2626;
+    border-left: 4px solid #ef4444;
+}
+
+/* Doğru Tanının Kendi Kutucuğu: Parlayan Yeşil */
+.cell-name.correct-diagnosis {
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    color: #ffffff;
+    border: 1px solid #66bb6a;
+    border-left: 4px solid #81c784;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.45);
+}
+
+/* Yanlış İpuçları (Özellikler): Grayed-out kutu ve bir tık açık gri yazı */
+.cell-red {
+    background-color: #1c2026;
+    color: #525c6a;
+    border: 1px solid #262b33;
+    box-shadow: none;
+}
+
+/* 1. Yanlış Tanılar: Extra Bold ve Keskin Okunabilirlik */
+.cell-name.wrong-diagnosis {
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    color: #ffdada;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 4px 12px rgba(183, 28, 28, 0.25);
+}
+
+/* 2. Sol Taraftaki Kilidi Açılmış Kutular: Griden Siyaha Gradyan + Derinlik */
+.lore-entry:not(.locked-clue):not(.alert) {
+    background: linear-gradient(135deg, #262c36 0%, #12151a 100%);
+    border: 1px solid #323a46;
+    border-left: 4px solid #00acc1;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Kritik Alarm Kutusu İçin Koyu Kırmızıdan Siyaha Gradyan */
+.lore-entry.alert {
+    background: linear-gradient(135deg, #3b1319 0%, #17080a 100%);
+    border: 1px solid #5c1d24;
+    border-left: 4px solid #ff5252;
+    box-shadow: 0 6px 18px rgba(255, 82, 82, 0.2);
+}
+
+/* 3. Sarı (Kısmi Eşleşme) Kutularına Yeşil Gibi Gradyan ve Kehribar Işıltısı */
+.cell-yellow {
+    background: linear-gradient(135deg, #f57f17 0%, #bc5100 100%);
+    color: #ffffff;
+    border: 1px solid #ffb74d;
+    box-shadow: 0 4px 14px rgba(245, 127, 23, 0.35);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* 4. O Beyaz Kaydırma Çubuğunu (Scrollbar) Karanlık ve Şık Yapma */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #121519;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2c3542;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00acc1;
+}
+
+/* 5. Sağ Panel Arka Planına Çok Silik Klinik Monitör Izgarası ve Satır Efekti */
+.right-panel {
+    background-color: #16191e;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.guess-row {
+    transition: transform 0.2s ease;
+}
+
+.guess-row:hover {
+    transform: translateY(-2px);
+}
+
+/* Sadece sağdaki yanlış tanı kutularında kelimeler arası boşluğu açar */
+.cell-name.wrong-diagnosis {
+    word-spacing: 2px; /* İstersen 3px - 5px arası da deneyebilirsin */
+}
+
+/* Soldaki açılmak üzere olan sarı/turuncu kutuya derinlikli sarı gradyan ve parlama */
+.lore-entry.locked-clue.next-up {
+    background: linear-gradient(135deg, #3a2a14 0%, #16120b 100%);
+    border: 1px solid #593e18;
+    border-left: 4px dashed #ffa726;
+    box-shadow: 0 6px 18px rgba(255, 167, 38, 0.15), inset 0 1px 0 rgba(255, 183, 77, 0.1);
+}
+
+/* 1. Sağdaki Sarı Kutuların Parlaklığını Kısma (Yeşillerin Önüne Geçmemesi İçin) */
+.cell-yellow {
+    background: linear-gradient(135deg, #d66d11 0%, #994000 100%);
+    color: #fff3e0;
+    border: 1px solid #e68a00;
+    box-shadow: 0 2px 6px rgba(214, 109, 17, 0.18); /* Yeşilin 0.45'lik parlamasına kıyasla çok daha sakin */
+}
+
+/* 2. Üzerine Gelinen (Hover) Satırın Her Şeyin Önüne Geçmesi ve Kesilmemesi */
+.guesses-container {
+    padding: 8px 4px; /* En üstteki satır yukarı kalktığında veya parladığında kenarlardan kırpılmasını önler */
+}
+
+.guess-row {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.guess-row:hover {
+    transform: translateY(-3px) scale(1.01);
+    z-index: 50; /* Diğer tüm satırların ve kutuların teknik olarak üst katmanına çıkar */
+}
+
+/* 4 Sütunlu Yeni Matris Izgarası */
+.matrix-header,
+.guess-row {
+    grid-template-columns: 1.8fr 1fr 1.2fr 1.1fr !important;
+}
+
+/* Kutuların İçindeki İkincil Mekanizma Gösterimi */
+.cell {
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sub-mech {
+    font-size: 0.72rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+/* Tanı Tahmini Kutularındaki Kalın Yazıları Tam Ortalama */
+.cell-name {
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding-left: 8px !important;
+}
+
+
+/* ==========================================
+   GERÇEK 3D KART DÖNÜŞÜ (100% FLIP) & KİLİT KIRILMA
+   ========================================== */
+
+.guess-row {
+    perspective: 1200px;
+}
+
+/* 3D Kart Konteyneri */
+.cell-3d-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 54px;
+    transform-style: preserve-3d;
+}
+
+/* Kartın Ön ve Arka Yüzlerinin Ortak Özellikleri */
+.cell-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 6px;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    word-break: break-word;
+    gap: 3px;
+}
+
+/* ÖN YÜZ: Başlangıçta görünen renksiz, nötr/kilitli yüz */
+.cell-front {
+    background-color: #1a1d24;
+    color: #78909c;
+    border: 1px solid #2e3540;
+    transform: rotateX(0deg);
+    z-index: 2;
+}
+
+.cell-front.locked-front {
+    border: 1px dashed #37474f;
+    color: #546e7a;
+    font-size: 1.15rem;
+}
+
+/* ARKA YÜZ: 180 derece arkada bekleyen renkli (Yeşil/Sarı/Kırmızı/Gri) yüz */
+.cell-back {
+    transform: rotateX(180deg);
+}
+
+/* 1. Doğrudan Açık Olan Hücrelerin 180 Derece Tam Dönüşü */
+.flip-card {
+    animation: fullFlip180 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Önceden açılmış (eski turlardaki) kartlar animasyonsuz direkt arka yüzünde durur */
+.flipped-static {
+    transform: rotateX(180deg);
+}
+
+@keyframes fullFlip180 {
+    0% {
+        transform: rotateX(0deg) scale(1);
+    }
+    45% {
+        /* Yarı yolda kart kameraya doğru hafifçe yaklaşır (Derinlik hissi) */
+        transform: rotateX(90deg) scale(1.06);
+    }
+    100% {
+        transform: rotateX(180deg) scale(1);
+    }
+}
+
+/* 2. KİLİT KIRILMA + TAM DÖNÜŞ ANİMASYONU (Önce titrer, kilit patlar, sonra 180 döner) */
+.shatter-and-flip {
+    animation: lockShatterAndFlip 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.shatter-and-flip .lock-icon {
+    display: inline-block;
+    animation: lockIconBreak 0.45s ease-in-out forwards;
+}
+
+@keyframes lockShatterAndFlip {
+    0% { transform: translateX(0) rotateX(0deg); }
+    8% { transform: translateX(-5px) rotateZ(-3deg); }
+    16% { transform: translateX(5px) rotateZ(3deg); }
+    24% { transform: translateX(-5px) rotateZ(-2deg); }
+    32% { transform: translateX(5px) rotateZ(2deg); }
+    40% { transform: translateX(0) rotateX(0deg) scale(1.05); }
+    70% { transform: rotateX(90deg) scale(1.08); }
+    100% { transform: rotateX(180deg) scale(1); }
+}
+
+@keyframes lockIconBreak {
+    0%, 50% {
+        transform: scale(1);
+        color: #ffa726;
+    }
+    80% {
+        transform: scale(1.6) rotate(12deg);
+        color: #ff5252;
+        text-shadow: 0 0 15px rgba(255, 82, 82, 0.9);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* ==========================================
+   1. GEÇİCİ YATAY SCROLLBAR SORUNU ÇÖZÜMÜ
+   ========================================== */
+.right-panel,
+.guesses-container {
+    overflow-x: hidden !important; /* Branş kartları dönerken sağa taşmayı ve scrollbar çıkmasını engeller */
+}
+
+.clinical-file {
+    perspective: 1000px; /* Sol paneldeki 3D açılış için perspektif */
+    overflow-x: hidden !important;
+}
+
+/* ==========================================
+   2. SÜTUN BAŞLIKLARI: SIFIR KAYMA (ZERO-SHIFT) MİMARİSİ
+   ========================================== */
+.matrix-header .col {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Başlık metni her zaman kendi merkezinde sabit durur */
+.header-title-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Kilit ikonu metnin akışını bozmaz, sağ kenara mutlak (absolute) olarak tutunur */
+.header-lock-badge {
+    position: absolute;
+    left: 100%;
+    margin-left: 6px;
+    font-size: 0.85rem;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* Kilit açılırken başlık parlar, kilit ikonu olduğu yerde yukarı süzülerek erir (Yazı hiç kaymaz!) */
+.header-unlock-anim .header-title-text {
+    animation: headerTextGlow 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.header-unlock-anim .header-lock-badge {
+    animation: lockFadeOutUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes headerTextGlow {
+    0% {
+        color: #ffa726;
+        text-shadow: 0 0 15px rgba(255, 167, 38, 0.8);
+    }
+    40% {
+        color: #4dd0e1;
+        text-shadow: 0 0 20px rgba(77, 208, 225, 0.9);
+    }
+    100% {
+        color: #b0bec5;
+        text-shadow: none;
+    }
+}
+
+@keyframes lockFadeOutUp {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    35% {
+        opacity: 1;
+        transform: scale(1.35) translateY(-2px);
+        filter: drop-shadow(0 0 10px rgba(77, 208, 225, 0.9));
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-10px);
+    }
+}
+
+/* ==========================================
+   3. SOL PANEL: 3D HINGE UNFOLD + IŞIK TARAMASI (SCANNER SWEEP)
+   ========================================== */
+.lore-entry.clue-just-unlocked {
+    position: relative;
+    overflow: hidden;
+    transform-origin: top center;
+    animation: clue3DUnfold 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+/* Kutunun içinden soldan sağa geçen parlak hologram/tarayıcı ışığı */
+.lore-entry.clue-just-unlocked::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 70%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 172, 193, 0.28) 50%,
+        transparent 100%
+    );
+    transform: skewX(-25deg);
+    animation: scannerSweep 1.33s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    pointer-events: none;
+}
+
+/* Kritik Alarm (Kırmızı) kutusu için kırmızı ışık taraması */
+.lore-entry.alert.clue-just-unlocked {
+    animation: alert3DUnfold 1.33s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.lore-entry.alert.clue-just-unlocked::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 82, 82, 0.35) 50%,
+        transparent 100%
+    );
+}
+
+@keyframes clue3DUnfold {
+    0% {
+        opacity: 0;
+        transform: rotateX(-75deg) translateY(-10px) scale(0.96);
+        border-color: #4dd0e1;
+        box-shadow: 0 0 30px rgba(0, 172, 193, 0.65);
+    }
+    60% {
+        opacity: 1;
+        transform: rotateX(6deg) translateY(0) scale(1.01);
+        border-color: #00acc1;
+    }
+    100% {
+        opacity: 1;
+        transform: rotateX(0deg) translateY(0) scale(1);
+    }
+}
+
+@keyframes alert3DUnfold {
+    0% {
+        opacity: 0;
+        transform: rotateX(-75deg) translateY(-10px) scale(0.96);
+        border-color: #ff5252;
+        box-shadow: 0 0 35px rgba(255, 82, 82, 0.8);
+    }
+    60% {
+        opacity: 1;
+        transform: rotateX(6deg) translateY(0) scale(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: rotateX(0deg) translateY(0) scale(1);
+    }
+}
+
+@keyframes scannerSweep {
+    0% {
+        left: -120%;
+    }
+    100% {
+        left: 160%;
+    }
+}
+
+/* ==========================================
+   SOL PANEL KUTU EZİLMESİ, KESİLME VE ORTALAMA ÇÖZÜMÜ
+   ========================================== */
+
+/* 1. KUTULARIN KENARLARDAN KESİLMEMESİ İÇİN TAMPON ALAN (BUFFER PADDING) */
+.clinical-file {
+    padding: 10px 14px !important; /* Animasyon büyüdüğünde ve parladığında kesilmemesi için pay */
+    margin: -10px -14px !important; /* Dış hizayı bozmamak için negatif margin ile dengeler */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* 2. KUTULARIN ASLA SIKIŞIP METNİ YUTMAMASI (KRİTİK DÜZELTME) */
+.lore-entry {
+    flex-shrink: 0 !important; /* Flexbox'ın kutuları dikeyde ezmesini %100 engeller */
+    height: auto !important;
+    min-height: fit-content !important;
+    overflow: visible !important; /* İçeriğin kesilmesini engeller */
+    position: relative;
+    z-index: 1;
+}
+
+/* 3. SOLDAKİ AÇILMIŞ KUTULARIN YAZILARINI ORTALAMA */
+.lore-entry:not(.locked-clue) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.lore-entry:not(.locked-clue) .entry-title {
+    text-align: center;
+    width: 100%;
+}
+
+.lore-entry:not(.locked-clue) p {
+    text-align: center;
+    width: 100%;
+    margin: 0;
+}
+
+/* 4. ANİMASYON SIRASINDA KUTUNUN HER ŞEYİN ÜSTÜNE ÇIKMASI VE KESİLMEMESİ */
+.lore-entry.clue-just-unlocked {
+    z-index: 30 !important; /* Animasyon oynarken diğer tüm kutuların ve sınırların üstüne çıkar */
+    overflow: hidden !important; /* Sadece içindeki ışık hüzmesini kutu içinde tutar, ama flex-shrink:0 olduğu için metni asla ezmez */
+}
+
+/* ==========================================
+   1. SOLDAKİ SIRADAKİ İPUCU (SARI KUTU) PERİYODİK GLARE (12 SANİYEDE BİR)
+   ========================================== */
+.lore-entry.locked-clue.next-up {
+    position: relative;
+    overflow: hidden !important; /* Işık yansımasının kutu dışına taşmaması için */
+}
+
+.lore-entry.locked-clue.next-up::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 65%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 183, 77, 0.25) 50%,
+        transparent 100%
+    );
+    transform: skewX(-25deg);
+    /* İlk geldiğinde hemen 1 kez geçer (%0 -> %10), sonra 12 saniyelik döngünün kalanında bekler */
+    animation: periodicYellowGlare 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    pointer-events: none;
+}
+
+@keyframes periodicYellowGlare {
+    0% {
+        left: -120%;
+    }
+    16% {
+        /* 1.2 saniye içinde soldan sağa süzülür */
+        left: 160%;
+    }
+    100% {
+        /* Kalan ~10.8 saniye boyunca tekrarlamadan bekler */
+        left: 160%;
+    }
+}
+
+/* ==========================================
+   1. DOĞRU TANI SATIRI: HIZLI GEÇİŞ + 6 SANİYE BEKLEMELİ YEŞİL GLARE
+   ========================================== */
+.guess-row.winning-row .cell-back.cell-green,
+.guess-row.winning-row .cell-back.correct-diagnosis {
+    position: absolute !important;
+    inset: 0 !important;
+    overflow: hidden !important;
+}
+
+.guess-row.winning-row .cell-back.cell-green::after,
+.guess-row.winning-row .cell-back.correct-diagnosis::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 75%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.42) 45%,
+        rgba(185, 246, 202, 0.5) 50%,
+        transparent 100%
+    );
+    transform: skewX(-25deg);
+    /* 6 saniyelik döngü: İlk %11'de (0.66sn) hızla geçer, kalan 5.34sn bekler */
+    animation: continuousGreenWave1 6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    pointer-events: none;
+}
+
+/* Kartlar taklasını bitirir bitirmez (ve sol alttaki yeşil kutu çıktığı an) şimşek gibi başlar */
+.guess-row.winning-row .cell-3d-wrapper:nth-child(1) .cell-back::after {
+    animation-delay: 1.2s;
+}
+.guess-row.winning-row .cell-3d-wrapper:nth-child(2) .cell-back::after {
+    animation-delay: 1.38s;
+}
+.guess-row.winning-row .cell-3d-wrapper:nth-child(3) .cell-back::after {
+    animation-delay: 1.56s;
+}
+.guess-row.winning-row .cell-3d-wrapper:nth-child(4) .cell-back::after {
+    animation-delay: 1.74s;
+}
+
+/* ==========================================
+   2. SOL ALTTAKİ YENİ YEŞİL TANI KUTUSUNA DA AYNI GLARE EFEKTİ
+   ========================================== */
+.phase-transition-banner {
+    position: relative;
+    overflow: hidden !important;
+}
+
+/* Sadece kazanıldığında çıkan yeşil barda çalışır (lost-banner'da çalışmaz) */
+.phase-transition-banner:not(.lost-banner)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.25) 45%,
+        rgba(105, 240, 174, 0.35) 50%,
+        transparent 100%
+    );
+    transform: skewX(-25deg);
+    /* Kutu ekrana gelir gelmez (0.15s) ilk hızlı glare geçer, sonra her 6 saniyede bir tekrarlar */
+    animation: continuousGreenWave2 6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s infinite;
+    pointer-events: none;
+}
+
+@keyframes continuousGreenWave1 {
+    0% {
+        left: -130%;
+    }
+    8% {
+        /* 6 saniyenin %8'i = x saniyede keskin ve hızlı geçiş */
+        left: 160%;
+    }
+    100% {
+        left: 160%;
+    }
+}
+
+@keyframes continuousGreenWave2 {
+    0% {
+        left: -130%;
+    }
+    33% {
+        /* 6 saniyenin %33'i = x saniyede keskin ve hızlı geçiş */
+        left: 160%;
+    }
+    100% {
+        left: 160%;
+    }
+}
+
+/* ==========================================
+   3. HAK ROZETİ (1/7): KAZANINCA YEŞİL, KAYBEDİNCE KIRMIZI
+   ========================================== */
+.badge.badge-win {
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%) !important;
+    border-color: #69f0ae !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 18px rgba(76, 175, 80, 0.6) !important;
+    animation: none !important;
+    transition: all 0.4s ease;
+}
+
+.badge.badge-lost {
+    background: linear-gradient(135deg, #c62828 0%, #7f0000 100%) !important;
+    border-color: #ff5252 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 18px rgba(244, 67, 54, 0.65) !important;
+    animation: none !important;
+    transition: all 0.4s ease;
+}
+
+/* ==========================================
+   1. KUTU BOYUTLARINI EŞİTLEME (ABSOLUTE FIX)
+   ========================================== */
+.cell-3d-wrapper {
+    height: 58px !important;
+    min-height: 58px !important;
+}
+
+/* Glare eklenirken bozulan position: absolute özelliğini geri çiviler */
+.cell-face,
+.guess-row.winning-row .cell-back.cell-green,
+.guess-row.winning-row .cell-back.correct-diagnosis {
+    position: absolute !important;
+    inset: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* Doğru tanı kutusunun yazısını da yanlış tanılar gibi kalın ve okunaklı yapar */
+.cell-name.correct-diagnosis {
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    word-spacing: 4px;
+}
+
+/* ==========================================
+   2. TARAYICI ALERT() YERİNE OYUN İÇİ GEÇİŞ BARI
+   ========================================== */
+.phase-transition-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #102a20 0%, #091712 100%);
+    border: 1px solid #4caf50;
+    border-left: 5px solid #00e676;
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.28);
+    animation: bannerSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.phase-transition-banner.lost-banner {
+    background: linear-gradient(135deg, #2c1215 0%, #14080a 100%);
+    border-color: #ef5350;
+    border-left-color: #ff5252;
+    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.28);
+}
+
+.banner-text h4 {
+    color: #69f0ae;
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+    letter-spacing: 0.5px;
+}
+
+.phase-transition-banner.lost-banner .banner-text h4 {
+    color: #ff8a80;
+}
+
+.banner-text p {
+    color: #cfd8dc;
+    font-size: 0.82rem;
+}
+
+.next-phase-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #00c853 0%, #2e7d32 100%);
+    color: white;
+    border: 1px solid #69f0ae;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 200, 83, 0.35);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.next-phase-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 200, 83, 0.55);
+}
+
+/* Hatalı girişte sarsılır, kırmızı parlar ve yumuşakça kendi rengine geri döner */
+#guess-input {
+    transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.input-shake {
+    animation: inputErrorShake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards !important;
+}
+
+@keyframes inputErrorShake {
+    0% {
+        transform: translateX(0);
+        border-color: #ff5252;
+        box-shadow: 0 0 15px rgba(255, 82, 82, 0.45);
+    }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% {
+        transform: translateX(-4px);
+        border-color: #ff5252;
+        box-shadow: 0 0 12px rgba(255, 82, 82, 0.35);
+    }
+    80% { transform: translateX(3px); }
+    100% {
+        transform: translateX(0);
+        /* Animasyon biterken yumuşakça varsayılan çerçeveye geri bırakır */
+    }
+}
+
+/* En alttaki Tanı Doğrulandı barının da üstteki sol ipuçları gibi 3D katlanarak açılması */
+.input-wrapper {
+    perspective: 1000px;
+}
+
+.phase-transition-banner {
+    transform-origin: top center;
+    animation: clue3DUnfold 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+/* ==========================================
+   SOL ÜST VAKA BAŞLIĞI (VAKA #1) ZAFER & KAYIP STİLLERİ
+   ========================================== */
+#main-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+
+#main-title.title-win {
+    color: #00e676 !important;
+    text-shadow: 0 0 18px rgba(0, 230, 118, 0.45);
+}
+
+#main-title.title-lost {
+    color: #ff5252 !important;
+    text-shadow: 0 0 18px rgba(255, 82, 82, 0.45);
+}
+
+.title-status-icon {
+    display: inline-block;
+    font-weight: 900;
+    animation: iconPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes iconPopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-20deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* ==========================================
+   DOĞRU BİLİNDİĞİNDE KRİTİK KUTU: DERİN SAFİR/KOBALT MAVİSİ VURGUSU
+   ========================================== */
+.lore-entry.alert.resolved-alert {
+    background: linear-gradient(135deg, #0d1b3a 0%, #070e20 100%) !important;
+    border: 1px solid #1e40af !important;
+    border-left: 4px solid #3b82f6 !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(96, 165, 250, 0.2) !important;
+    transition: background 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+}
+
+.lore-entry.alert.resolved-alert .entry-title {
+    color: #60a5fa !important;
+    text-shadow: 0 0 12px rgba(59, 130, 246, 0.5) !important;
+    transition: color 0.6s ease;
+}
+
+.lore-entry.alert.resolved-alert p {
+    color: #e2e8f0 !important;
+}
+
+/* Zafer sekansında açılırken kırmızı yerine safir mavisi 3D açılış ve ışık taraması yapar */
+.lore-entry.alert.resolved-alert.clue-just-unlocked {
+    animation: resolvedAlert3DUnfold 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.lore-entry.alert.resolved-alert.clue-just-unlocked::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(59, 130, 246, 0.4) 50%,
+        transparent 100%
+    ) !important;
+}
+
+@keyframes resolvedAlert3DUnfold {
+    0% {
+        opacity: 0;
+        transform: rotateX(-75deg) translateY(-10px) scale(0.96);
+        border-color: #60a5fa;
+        box-shadow: 0 0 35px rgba(59, 130, 246, 0.8);
+    }
+    60% {
+        opacity: 1;
+        transform: rotateX(6deg) translateY(0) scale(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: rotateX(0deg) translateY(0) scale(1);
+    }
+}
+
+/* ==========================================
+   SOL PANEL GÖRSEL SAKİNLEŞTİRME & TİPOGRAFİ VURGUSU
+   ========================================== */
+
+/* Standart açık kutuların neon parlaklığını azaltıp mat klinik dosya görünümü verme */
+.lore-entry:not(.locked-clue):not(.alert) {
+    background: #14181f !important;
+    border: 1px solid #222934 !important;
+    border-left: 3px solid #00838f !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Sadece O TURDA YENİ AÇILAN kutu parlak turkuaz dikkat çeksin */
+.lore-entry.clue-just-unlocked:not(.alert) {
+    background: linear-gradient(135deg, #16222a 0%, #11171d 100%) !important;
+    border: 1px solid rgba(0, 172, 193, 0.45) !important;
+    border-left: 4px solid #00e5ff !important;
+    box-shadow: 0 4px 15px rgba(0, 172, 193, 0.2) !important;
+}
+
+/* Oyun kazanıldığında Kritik Kutu da neon mavi yerine daha tok ve asil bir Gece Mavisi olsun */
+.lore-entry.alert.resolved-alert {
+    background: linear-gradient(135deg, #10192b 0%, #0b111e 100%) !important;
+    border: 1px solid #1e3a8a !important;
+    border-left: 4px solid #38bdf8 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.5) !important;
+}
+
+.lore-entry.alert.resolved-alert .entry-title {
+    color: #38bdf8 !important;
+    text-shadow: none !important;
+}
+
+/* Üstteki kutunun sınırda kesilmesini önlemek için clinical-file düzeltmesi */
+.clinical-file {
+    margin: 0 !important;
+    padding: 4px 6px 8px 2px !important;
+}
+
+/* Metin içindeki sayısal laboratuvar ve vital değerlerinin otomatik vurgusu */
+.clinical-val {
+    color: #e0f7fa;
+    background: rgba(0, 172, 193, 0.14);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85em;
+}
+
+/* ==========================================
+   SAĞ PANEL: RENK DENGESİ VE MODERN DARK-UI RAFİNASYONU
+   ========================================== */
+
+/* 1. YANLIŞ TANI İSİMLERİ: Kırmızı Duvar yerine Mat Antrasit + Sol Mercan Şerit */
+.cell-back.wrong-diagnosis {
+    background: linear-gradient(135deg, #1a1f29 0%, #13171f 100%) !important;
+    border: 1px solid #2a313c !important;
+    border-left: 4px solid #ef5350 !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 2. GRİ (EŞLEŞMEYEN) KUTULAR: Daha derin ve sessiz arka plan */
+.cell-back.cell-red {
+    background: #12161d !important;
+    border: 1px solid #1e242d !important;
+    color: #4b5563 !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================
+   METİN KONTRAST DENGESİ VE ANINDA HOVER ÇIKIŞI
+   ========================================== */
+
+/* 3. SARI / KEHRİBAR KUTULAR: Göz almayan sıcak krem-kehribar yazı */
+.cell-back.cell-yellow {
+    background: linear-gradient(135deg, #3b2610 0%, #271809 100%) !important;
+    border: 1px solid #d97706 !important;
+    color: #f3d092 !important; /* Parlak sarıdan dengeli sıcak kreme çekildi */
+    box-shadow: inset 0 1px 0 rgba(251, 191, 36, 0.15) !important;
+}
+
+/* 4. YEŞİL KUTULAR: Solukluğu giderilmiş, net ve canlı zümrüt-beyaz yazı */
+.cell-back.cell-green {
+    background: linear-gradient(135deg, #113623 0%, #0b2417 100%) !important;
+    border: 1px solid #10b981 !important;
+    color: #e6fffa !important; /* Soluk yeşilden net buz-zümrüt tonuna açıldı */
+    box-shadow: inset 0 1px 0 rgba(52, 211, 153, 0.2) !important;
+}
+
+/* 5. DOĞRU TANI SATIRI (ZAFER SATIRI): Tam Parlak ve Vurgulu Zümrüt */
+.guess-row.winning-row .cell-back.correct-diagnosis,
+.guess-row.winning-row .cell-back.cell-green {
+    background: linear-gradient(135deg, #155e3b 0%, #0d3d26 100%) !important;
+    border: 1px solid #34d399 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* 6. ODAK HİYERARŞİSİ: İlk kararma 1.6sn bekler, ama fareyi çekince ANINDA (0.12sn) eski haline döner */
+.guesses-container:has(.winning-row) .guess-row:not(.winning-row) {
+    animation: dimOldRowsOnWin 0.45s ease 1.6s forwards;
+    transition: opacity 0.12s ease-out !important; /* Fare çekildiği an gecikmesiz kararır */
+}
+
+.guesses-container:has(.winning-row) .guess-row:not(.winning-row):hover {
+    opacity: 1 !important;
+    transition: opacity 0.1s ease-in !important;
+}
+
+@keyframes dimOldRowsOnWin {
+    from { opacity: 1; }
+    to { opacity: 0.6; }
+}
+
+/* ==========================================
+   FINAL POLISH: ÜST KESİLME FADE EFEKTİ, GRİ OKUNURLUK VE SON HAK VURGUSU
+   ========================================== */
+
+/* 1. SOL PANEL: Yukarı kayan kutuların bıçak gibi kesilmesini önleyen üst-alt yumuşak geçiş (Fade Mask) */
+.clinical-file {
+    /* 0px'den 34px'e kadar kademeli ve yumuşak geçiş (Eskisi 14px ve 10px idi) */
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0px,
+        rgba(0, 0, 0, 0.35) 16px,
+        black 34px,
+        black calc(100% - 34px),
+        rgba(0, 0, 0, 0.35) calc(100% - 16px),
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0px,
+        rgba(0, 0, 0, 0.35) 16px,
+        black 34px,
+        black calc(100% - 34px),
+        rgba(0, 0, 0, 0.35) calc(100% - 16px),
+        transparent 100%
+    );
+    /* En üst ve en alttaki kutunun kaydırma sonunda tam net görünmesi için iç boşluk */
+    padding-top: 24px !important;
+    padding-bottom: 28px !important;
+}
+
+/* Sol panel için ince ve şık karanlık Scrollbar */
+.clinical-file::-webkit-scrollbar {
+    width: 5px;
+}
+.clinical-file::-webkit-scrollbar-track {
+    background: transparent;
+}
+.clinical-file::-webkit-scrollbar-thumb {
+    background: #263238;
+    border-radius: 10px;
+}
+.clinical-file::-webkit-scrollbar-thumb:hover {
+    background: #37474f;
+}
+
+/* 2. SAĞ PANEL GRİ KUTULAR: Sönük havayı koruyarak metin okunabilirliğini rahatlatma */
+.cell-back.cell-red {
+    background: #13171f !important;
+    border: 1px solid #212834 !important;
+    color: #7c8b9e !important; /* Çok karanlık griden rahat okunan çelik grisine çekildi */
+}
+
+/* 3. SON HAK (7/7) GERİLİMİ: Sayaç kırmızı (badge-danger) olduğunda arama barı da kritik moda geçer */
+.left-panel:has(.badge-danger) #guess-input {
+    border-color: rgba(255, 82, 82, 0.55);
+    box-shadow: 0 0 12px rgba(255, 82, 82, 0.15);
+}
+
+.left-panel:has(.badge-danger) #guess-input:focus {
+    border-color: #ff5252;
+    box-shadow: 0 0 18px rgba(255, 82, 82, 0.3);
+}
+
+.left-panel:has(.badge-danger) #submit-guess {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.35);
+}
+
+/* ==========================================
+   SAĞ PANEL: TONU DÜŞÜRÜLMÜŞ, ALÇAK, SMOOTH VE CANLI NABIZ (PULSE) AMBIENT IŞIMA
+   ========================================== */
+
+@property --ambient-r {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+@property --ambient-g {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 172;
+}
+@property --ambient-b {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 193;
+}
+@property --ambient-alpha {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0.07;
+}
+
+.right-panel {
+    position: relative;
+    overflow: hidden !important;
+    z-index: 1;
+    /* Varsayılan Değerler: Çok hafif Turkuaz */
+    --ambient-r: 0;
+    --ambient-g: 172;
+    --ambient-b: 193;
+    --ambient-alpha: 0.06;
+    /* Nabız hızı değişkeni (Varsayılan: 4sn sakin nefes) */
+    --pulse-speed: 4s;
+    /* Renk ve parlaklık değişimleri 1.8 saniyede yağ gibi kayarak gerçekleşir */
+    transition: 
+        --ambient-r 1.8s cubic-bezier(0.22, 1, 0.36, 1),
+        --ambient-g 1.8s cubic-bezier(0.22, 1, 0.36, 1),
+        --ambient-b 1.8s cubic-bezier(0.22, 1, 0.36, 1),
+        --ambient-alpha 1.8s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 1.5s ease,
+        box-shadow 1.8s ease !important;
+}
+
+/* 1. KATMAN: Kubbe sınırı olmayan, çok kademeli (multi-stop) ve blur'lu organik ışık yayılımı */
+.right-panel::before {
+    content: "";
+    position: absolute;
+    inset: -20px; /* Blur kenarlarda kesilmesin diye hafif dışarı taşırıyoruz */
+    pointer-events: none;
+    z-index: -2;
+    transform-origin: bottom center;
+    background: 
+        /* 1. Geniş Ufuk Çizgisi: Yanlardan kubbe yapmaması için %145 genişlik ve 5 yumuşak durak */
+        radial-gradient(
+            ellipse 145% 55% at 50% 108%, 
+            rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), var(--ambient-alpha)) 0%, 
+            rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-alpha) * 0.65)) 25%,
+            rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-alpha) * 0.30)) 50%,
+            rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-alpha) * 0.08)) 75%,
+            transparent 100%
+        ),
+        /* 2. Taban Düzleştirici: En alt kenarı boydan boya homojen besler */
+        linear-gradient(
+            to top,
+            rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-alpha) * 0.55)) 0%,
+            rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-alpha) * 0.15)) 18%,
+            transparent 45%
+        );
+    filter: blur(24px); /* Keskin matematiksel geçiş halkalarını tamamen eritir */
+    animation: ambientGlowBreath var(--pulse-speed) ease-in-out infinite;
+}
+
+/* 2. KATMAN: Noktaların da kubbe gibi değil, çok yumuşak kademelerle sönümlenmesi */
+.right-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background-image: radial-gradient(
+        rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-alpha) * 1.9)) 1px, 
+        transparent 1px
+    );
+    background-size: 20px 20px;
+    /* Çok duraklı yumuşak maske: Sınır çizgisi oluşturmadan erir */
+    -webkit-mask-image: linear-gradient(
+        to top, 
+        rgba(0,0,0,0.85) 0%, 
+        rgba(0,0,0,0.45) 14%, 
+        rgba(0,0,0,0.12) 28%, 
+        transparent 48%
+    );
+    mask-image: linear-gradient(
+        to top, 
+        rgba(0,0,0,0.85) 0%, 
+        rgba(0,0,0,0.45) 14%, 
+        rgba(0,0,0,0.12) 28%, 
+        transparent 48%
+    );
+    animation: ambientDotsPulse var(--pulse-speed) ease-in-out infinite;
+}
+
+/* Işığın yatayda daralmadan (kubbeleşmeden) sadece dikeyde nefes alıp vermesi */
+@keyframes ambientGlowBreath {
+    0%, 100% {
+        opacity: 0.72;
+        transform: scaleY(0.88);
+    }
+    50% {
+        opacity: 1.15;
+        transform: scaleY(1.14);
+    }
+}
+
+/* Noktaların ışıkla senkronize parlayıp sönmesi */
+@keyframes ambientDotsPulse {
+    0%, 100% {
+        opacity: 0.65;
+    }
+    50% {
+        opacity: 1.1;
+    }
+}
+
+/* --- DURUM 1: UYARI HAKLARI (5/7 ve 6/7 - HAFİF KEHRİBAR + ORTA TEMPO NABIZ) --- */
+.game-container:has(.badge-warning) .right-panel {
+    --ambient-r: 245;
+    --ambient-g: 158;
+    --ambient-b: 11;
+    --ambient-alpha: 0.1;
+    --pulse-speed: 2.6s;
+}
+
+/* --- DURUM 2: SON ŞANS (7/7 - HAFİF KIZIL + HIZLI KRİTİK NABIZ) --- */
+.game-container:has(.badge-danger) .right-panel {
+    --ambient-r: 239;
+    --ambient-g: 68;
+    --ambient-b: 68;
+    --ambient-alpha: 0.16;
+    --pulse-speed: 1.85s;
+}
+
+/* --- DURUM 3: DOĞRU TANI (ZAFER YEŞİLİ - DERİN VE HUZURLU NEFES) --- */
+.game-container:has(.badge-win) .right-panel {
+    --ambient-r: 16;
+    --ambient-g: 185;
+    --ambient-b: 129;
+    --ambient-alpha: 0.18;
+    --pulse-speed: 3.8s;
+    border-color: rgba(16, 185, 129, 0.22) !important;
+    box-shadow: inset 0 -15px 35px -20px rgba(16, 185, 129, 0.12) !important;
+}
+
+/* --- DURUM 4: VAKA KAYBEDİLDİ (KOYU KIZIL - YAVAŞ SÖNÜMLü NEFES) --- */
+.game-container:has(.badge-lost) .right-panel {
+    --ambient-r: 220;
+    --ambient-g: 38;
+    --ambient-b: 38;
+    --ambient-alpha: 0.18;
+    --pulse-speed: 4.5s;
+    border-color: rgba(239, 68, 68, 0.22) !important;
+    box-shadow: inset 0 -15px 35px -20px rgba(239, 68, 68, 0.12) !important;
+}
+
+/* Kutuların hizasını ve boyutunu değiştirmeden sadece görünmez kesilme sınırını (clipping) dışarı taşır */
+.clinical-file {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    margin-left: -12px !important;
+    margin-right: -8px !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================
+   VAKA SEÇİCİ (CASE SWITCHER) BAR & DURUM RENKLERİ
+   ========================================== */
+.header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.case-selector {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: #0e1116;
+    padding: 4px 6px;
+    border-radius: 8px;
+    border: 1px solid #222934;
+}
+
+.case-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid #2e3644;
+    background-color: #181c24;
+    color: #78909c;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.case-btn:hover {
+    border-color: #00acc1;
+    color: #e0f7fa;
+    transform: translateY(-1px);
+}
+
+/* Şu an ekranda açık olan aktif vaka */
+.case-btn.active-case {
+    border-color: #00e5ff;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+    background-color: #1e2936;
+}
+
+/* Doğru Bilinmiş Vaka (Yeşil) */
+.case-btn.case-won {
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    border-color: #66bb6a;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.35);
+}
+
+/* Kaybedilmiş Vaka (Kırmızı) */
+.case-btn.case-lost {
+    background: linear-gradient(135deg, #c62828 0%, #7f0000 100%);
+    border-color: #ef5350;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.35);
+}
+
+/* Aktif olan vaka kazanılmış/kaybedilmişse altında parlak nokta/çerçeve vurgusu */
+.case-btn.active-case.case-won,
+.case-btn.active-case.case-lost {
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+    border-width: 2px;
+}
+
+/* Sağ üstteki vaka seçici ile hak sayacı arasındaki hiza ve sabit genişlik */
+.status-badges {
+    gap: 14px !important;
+}
+
+#attempt-counter {
+    min-width: 78px;
+    text-align: center;
+}
+

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klinik Vaka Analizi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- SOL PANEL: Vaka Dosyası ve Tahmin Girişi -->
+        <div class="left-panel">
+            <div class="panel-header">
+                <div>
+                    <h2 id="main-title">VAKA #001</h2>
+                    <span class="sub-header" id="case-subtitle">...</span>
+                </div>
+                <div class="status-badges">
+                    <span class="badge" id="attempt-counter">1 / 7</span>
+                </div>
+            </div>
+            
+            <div class="clinical-file" id="clinical-file">
+                <!-- Hikaye parçaları JavaScript ile buraya eklenecek -->
+            </div>
+
+            <div class="input-wrapper">
+                <div id="autocomplete-list" class="autocomplete-items"></div>
+                <div class="input-section">
+                    <input type="text" id="guess-input" placeholder="Tanı arayın..." autocomplete="off">
+                    <button id="submit-guess">Onayla</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ PANEL: Tahmin Matrisi (4 Sütunlu Yeni Yapı) -->
+        <div class="right-panel">
+            <div class="matrix-header">
+                <div class="col">Tanı Tahmini</div>
+                <div class="col" id="header-seyir">Seyir</div>
+                <div class="col locked" id="header-mekanizma">Temel Mekanizma 🔒</div>
+                <div class="col locked" id="header-brans">Branş 🔒</div>
+            </div>
+            
+            <div class="guesses-container" id="guesses-container">
+                <!-- Oyuncunun tahminleri buraya alt alta eklenecek -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
