@@ -1419,7 +1419,7 @@ const casesDB = [
             },
             {
                 turn: 7, // 6. Yanlışta açılır (Son Şans!)
-                title: "Laboratuvar & Spesifik",
+                title: "Laboratuvar & Spesifik Sonuçlarrrr",
                 text: "Laboratuvarda Hb: 8.2 g/dL, MCV: 64 fL, Ferritin: 4 ng/mL olarak sonuçlandı. Baryumlu özofagus grafisinde ve üst GİS endoskopisinde üst özofageal sfinkterin hemen altında, lümeni kısmen daraltan ince, eksantrik yerleşimli mukozal perde izlendi; biyopside malignite saptanmadı.",
                 isAlert: true
             }
