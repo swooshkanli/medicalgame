@@ -1,34 +1,112 @@
-// Aktif Vaka Seçimi (Başlangıçta 1. vakadan yani index 0'dan başlar, istersen değiştirebilirsin)
+// Aktif Vaka Seçimi
 let activeCaseIndex = 0; 
 let currentCaseData = casesDB[activeCaseIndex];
 let targetDisease = diseaseDB.find(d => d.id === currentCaseData.targetDiseaseId);
 
 const maxGuesses = gameConfig.maxGuesses; // 7
 
-// HER VAKANIN DURUMUNU TUTAN OTURUM HAFIZASI (Sayfa yenilenene kadar korunur)
+// HER VAKANIN DURUMUNU TUTAN OTURUM HAFIZASI
 const caseStates = casesDB.map(() => ({
     wrongGuesses: 0,
     guessedHistory: [],
     status: "unplayed",   // "unplayed" | "playing" | "won" | "lost"
     isGameWon: false,
-    finalAttemptCount: null // Kazanıldığında veya kaybedildiğinde sayacın kaçta kaldığını (Örn: 4/7) hatırlar
+    finalAttemptCount: null
 }));
 
-// Geriye dönük uyumluluk için aktif vakanın anlık değişkenleri
 let wrongGuesses = 0;
 let guessedHistory = [];
 let isGameWon = false;
+let isTurnTransitioning = false;
 
-// Vakalar arası hızlı geçişte eski vakanın setTimeout'larının yeni vakayı bozmasını önleyen liste
+// Zamanlayıcı ve aktif kaydırma (scroll) yöneticisi
 let activeTimeouts = [];
+let activeScrollRafId = null;
+
 function registerTimeout(fn, delay) {
     const id = setTimeout(fn, delay);
     activeTimeouts.push(id);
     return id;
 }
+
+function cancelActiveScroll() {
+    if (activeScrollRafId !== null) {
+        cancelAnimationFrame(activeScrollRafId);
+        activeScrollRafId = null;
+    }
+}
+
 function clearActiveTimeouts() {
     activeTimeouts.forEach(id => clearTimeout(id));
     activeTimeouts = [];
+    cancelActiveScroll();
+    isTurnTransitioning = false;
+}
+
+// Dikey telefon/tablet modunda olup olmadığımızı kontrol eder
+function isPortraitScrollMode() {
+    return window.matchMedia("(max-width: 950px) and (orientation: portrait)").matches;
+}
+
+// Hedef elemana pürüzsüz kayar ve kayma TAMAMLANDIĞINDA animasyonu tetikler
+function smoothScrollToElement(targetEl, onComplete, align = "center") {
+    cancelActiveScroll();
+    if (!targetEl) {
+        if (onComplete) onComplete();
+        return;
+    }
+
+    const rect = targetEl.getBoundingClientRect();
+    const currentY = window.scrollY || window.pageYOffset;
+    const viewportH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+    let targetY;
+    if (align === "top") {
+        // Üst bar / çentik altında kalmaması için 28px güvenli boşluk bırakır
+        targetY = currentY + rect.top - 28;
+    } else {
+        targetY = currentY + rect.top - (viewportH - rect.height) / 2;
+    }
+
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - viewportH);
+    targetY = Math.max(0, Math.min(targetY, maxScroll));
+
+    const distance = targetY - currentY;
+
+    // Zaten ekranda tam hizadaysa kısa bir es verip animasyonu başlat
+    if (Math.abs(distance) < 12) {
+        registerTimeout(() => {
+            if (onComplete) onComplete();
+        }, 90);
+        return;
+    }
+
+    const duration = Math.min(520, Math.max(300, Math.abs(distance) * 0.55));
+    const startTime = performance.now();
+
+    function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeInOutCubic(progress);
+
+        window.scrollTo(0, currentY + distance * eased);
+
+        if (progress < 1) {
+            activeScrollRafId = requestAnimationFrame(step);
+        } else {
+            activeScrollRafId = null;
+            // Göz yeni konuma oturduğu an (60ms sonra) animasyonu başlat
+            registerTimeout(() => {
+                if (onComplete) onComplete();
+            }, 60);
+        }
+    }
+
+    activeScrollRafId = requestAnimationFrame(step);
 }
 
 // Sağdaki Sütunların Açıldığı Yanlış Tahmin Sayıları
@@ -50,7 +128,6 @@ const attemptCounterEl = document.getElementById("attempt-counter");
 const inputWrapperEl = document.querySelector(".input-wrapper");
 const inputSectionEl = document.querySelector(".input-section");
 
-// Mevcut değişkenleri aktif vakanın hafızasına kaydeder
 function syncStateToMemory() {
     const state = caseStates[activeCaseIndex];
     state.wrongGuesses = wrongGuesses;
@@ -58,7 +135,7 @@ function syncStateToMemory() {
     state.isGameWon = isGameWon;
 }
 
-// Vaka Seçici Butonları sol panelin başlık kısmına kusursuz yerleştiren fonksiyon
+// Vaka Seçici Butonları (2. Satırda kompakt)
 function renderCaseSelector() {
     let selectorRow = document.getElementById("case-selector-row");
     let selectorContainer = document.getElementById("case-selector");
@@ -108,7 +185,6 @@ function renderCaseSelector() {
 
 // Vakalar Arası Geçiş Fonksiyonu
 function switchCase(newIndex) {
-    // Eğer önceki vakada zafer/kayıp animasyonu henüz bitmeden başka vakaya tıklandıysa bekleyen işlemleri hemen tamamla
     clearActiveTimeouts();
     const prevState = caseStates[activeCaseIndex];
     if (prevState.status === "won" && !prevState.isGameWon) {
@@ -117,7 +193,6 @@ function switchCase(newIndex) {
         prevState.wrongGuesses = Math.max(prevState.wrongGuesses, maxClueTurn - 1);
     }
 
-    // Yeni vakaya geç
     activeCaseIndex = newIndex;
     currentCaseData = casesDB[activeCaseIndex];
     targetDisease = diseaseDB.find(d => d.id === currentCaseData.targetDiseaseId);
@@ -128,6 +203,12 @@ function switchCase(newIndex) {
     isGameWon = state.isGameWon;
 
     initGame(true);
+
+    if (isPortraitScrollMode()) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (window.matchMedia("(pointer: fine)").matches && !guessInputEl.disabled) {
+        guessInputEl.focus();
+    }
 }
 
 // Hak Sayacını ve Rengini Güncelleyen Fonksiyon
@@ -162,7 +243,6 @@ function initGame(isSwitchingCase = false) {
     const state = caseStates[activeCaseIndex];
     caseSubtitleEl.textContent = currentCaseData.customSubTitle || gameConfig.defaultSubTitle;
 
-    // Başlık Durumu (Normal / Yeşil ✓ / Kırmızı ✕)
     mainTitleEl.className = "";
     if (state.status === "won" && isGameWon) {
         mainTitleEl.classList.add("title-win");
@@ -177,24 +257,21 @@ function initGame(isSwitchingCase = false) {
     updateAttemptBadge();
     renderCaseSelector();
 
-    // Eğer bu vakada henüz hiç tahmin yapılmadıysa ilk ipucu 3D açılış animasyonuyla gelsin, 
-    // ama oynanmış/bitmiş bir vakaya geri dönülüyorsa kutular sabit dursun (tekrar animasyon yapmasın)
     const isFreshCase = (guessedHistory.length === 0 && state.status === "unplayed");
-    renderClues(isFreshCase, !isFreshCase && isSwitchingCase);
-    renderMatrix(false, false);
+    renderClues(isFreshCase, !isFreshCase && isSwitchingCase, false);
+    renderMatrix(false, false, false);
 
-    // Alt Bar (Input vs Sonuç Banner'ı) Kontrolü
     const existingBanner = document.getElementById("end-phase-banner");
     if (existingBanner) existingBanner.remove();
 
     if (state.status === "won" && isGameWon) {
         guessInputEl.disabled = true;
         submitBtn.disabled = true;
-        showEndBanner(true, targetDisease.name, true);
+        showEndBanner(true, targetDisease.name, true, false);
     } else if (state.status === "lost") {
         guessInputEl.disabled = true;
         submitBtn.disabled = true;
-        showEndBanner(false, targetDisease.name, true);
+        showEndBanner(false, targetDisease.name, true, false);
     } else {
         if (inputSectionEl) inputSectionEl.style.display = "flex";
         guessInputEl.disabled = false;
@@ -204,13 +281,13 @@ function initGame(isSwitchingCase = false) {
     }
 }
 
-// mm³, °C, (+)-(++++) ve (-) dahil tüm klinik birimleri hatasız vurgulayan fonksiyon
+// Klinik birimleri vurgulayan fonksiyon
 function highlightClinicalText(text) {
     return text.replace(/(%\d+(?:[.,]\d+)?|\(\+{1,4}\)|\(-\)|\b\d+(?:[.,/-]\d+)*\s*(?:mmHg|\/dk|°C|\/mm³|mm³|\/mm3|mm3|kg\/m²|kg\/m2|U\/L|mIU\/L|mg\/dL|g\/dL|mmol\/L|mEq\/L|ng\/mL|pg\/mL|mcL|fL|cm|mm|sn|katı)(?![a-zA-ZğüşıöçĞÜŞİÖÇ]))/g, '<span class="clinical-val">$1</span>');
 }
 
-// Sol Taraftaki İpuçlarını Ekrana Basma
-function renderClues(isInitial = false, suppressAnimation = false) {
+// Sol Taraftaki İpuçlarını Ekrana Basma (deferUnlockAnim: dikey mobilde kayma bitene kadar katlı bekletir)
+function renderClues(isInitial = false, suppressAnimation = false, deferUnlockAnim = false) {
     clinicalFileEl.innerHTML = "";
     const currentTurn = wrongGuesses + 1;
 
@@ -219,9 +296,10 @@ function renderClues(isInitial = false, suppressAnimation = false) {
 
         if (currentTurn >= clue.turn) {
             const isJustUnlocked = !suppressAnimation && (currentTurn === clue.turn) && (wrongGuesses > 0 || isInitial);
-            const unlockAnimClass = isJustUnlocked ? "clue-just-unlocked" : "";
+            const unlockAnimClass = isJustUnlocked
+                ? (deferUnlockAnim ? "clue-awaiting-anim" : "clue-just-unlocked")
+                : "";
             
-            // Oyun doğru bilerek bittiyse kritik kutular kırmızı yerine koyu mavi (resolved-alert) olur!
             const alertClass = clue.isAlert ? (isGameWon ? "alert resolved-alert" : "alert") : "";
 
             div.className = `lore-entry ${alertClass} ${unlockAnimClass}`;
@@ -242,26 +320,11 @@ function renderClues(isInitial = false, suppressAnimation = false) {
         clinicalFileEl.appendChild(div);
     });
 
-if (!isInitial && !suppressAnimation) {
-        const isPortraitMobile = window.matchMedia("(max-width: 950px) and (orientation: portrait)").matches;
-        const scrollDelay = isPortraitMobile ? 260 : 100; // Mobilde klavyenin kapanma süresi için pay
-
+    // Masaüstü ve yatay modda sol panel kendi içinde yeni ipucuna kayar
+    if (!isInitial && !suppressAnimation && !isPortraitScrollMode()) {
         registerTimeout(() => {
-            if (isPortraitMobile) {
-                const justUnlocked = clinicalFileEl.querySelector(".clue-just-unlocked");
-                if (justUnlocked) {
-                    justUnlocked.scrollIntoView({ behavior: "smooth", block: "center" });
-                } else {
-                    // O turda sol panelde yeni ipucu açılmadıysa (3. ve 6. turlar gibi) yeni tahmin satırına kaydır
-                    const latestRow = guessesContainerEl.lastElementChild;
-                    if (latestRow) {
-                        latestRow.scrollIntoView({ behavior: "smooth", block: "center" });
-                    }
-                }
-            } else {
-                clinicalFileEl.scrollTo({ top: clinicalFileEl.scrollHeight, behavior: "smooth" });
-            }
-        }, scrollDelay);
+            clinicalFileEl.scrollTo({ top: clinicalFileEl.scrollHeight, behavior: "smooth" });
+        }, 40);
     }
 }
 
@@ -290,7 +353,6 @@ function evaluatePrimarySecondary(guessedObj, targetObj) {
     return "cell-red";
 }
 
-// Kutunun İçine Yazılacak Metin
 function formatBoxText(obj, isCorrect) {
     if (isCorrect && obj.secondary) {
         return `<span>${obj.primary}</span><span class="sub-mech">(+${obj.secondary})</span>`;
@@ -298,10 +360,12 @@ function formatBoxText(obj, isCorrect) {
     return `<span>${obj.primary}</span>`;
 }
 
-// Sağ Sütun Başlıklarını Güncelleyen Fonksiyon (Gecikmeli Senkronize Açılış Destekli)
-function updateColumnHeader(elementId, title, threshold, justUnlocked, unlockDelayMs = 0, forceUnlocked = false) {
+// Sağ Sütun Başlıklarını Güncelleyen Fonksiyon
+function updateColumnHeader(elementId, title, threshold, justUnlocked, unlockDelayMs = 0, forceUnlocked = false, deferUnlock = false) {
     const el = document.getElementById(elementId);
-    const remaining = forceUnlocked ? 0 : (threshold - wrongGuesses);
+    const remaining = forceUnlocked
+        ? 0
+        : (deferUnlock && justUnlocked ? 1 : (threshold - wrongGuesses));
 
     const triggerUnlockAnim = () => {
         el.classList.remove("locked", "unlocked-header", "next-up-header", "header-unlock-anim");
@@ -313,9 +377,15 @@ function updateColumnHeader(elementId, title, threshold, justUnlocked, unlockDel
         `;
         void el.offsetWidth;
         el.classList.add("header-unlock-anim");
+
+        // Animasyon bitince (950ms) görünmez kilit ikonunu DOM'dan temizle ki başlığı kaydırmasın/kesmesin
+        registerTimeout(() => {
+            const badge = el.querySelector(".header-lock-badge");
+            if (badge) badge.remove();
+        }, 950);
     };
 
-    if (justUnlocked) {
+    if (justUnlocked && !deferUnlock) {
         if (unlockDelayMs > 0) {
             registerTimeout(triggerUnlockAnim, unlockDelayMs);
         } else {
@@ -367,7 +437,10 @@ function create3DCellHTML({ content, colorClass, isUnlocked, animType, delayMs, 
     let wrapperClass = "flipped-static";
     let styleAttr = "";
 
-    if (animType === "flip") {
+    if (animType === "pre-flip") {
+        // Kayma bitene kadar ön yüzde (dönmeden) bekler
+        wrapperClass = "";
+    } else if (animType === "flip") {
         wrapperClass = "flip-card";
         styleAttr = `style="animation-delay: ${delayMs}ms;"`;
     } else if (animType === "shatter") {
@@ -388,13 +461,12 @@ function create3DCellHTML({ content, colorClass, isUnlocked, animType, delayMs, 
     `;
 }
 
-// Sağ Taraftaki Tahmin Matrisini Güncelleme
-function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
+// Sağ Taraftaki Tahmin Matrisini Güncelleme (deferAnimations: dikey mobilde kayma bitene kadar kartları/kilitleri bekletir)
+function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnimations = false) {
     guessesContainerEl.innerHTML = "";
     const state = caseStates[activeCaseIndex];
-    const isAlreadyWonCase = (state.status === "won");
+    const isAlreadyWonCase = (state.status === "won" && !deferAnimations && !isWinningGuess);
 
-    // Normal turda mı açıldı, yoksa doğru tanı bilindiği için mi kilidi kırılıyor?
     const mekNormallyUnlocked = !isWinningGuess && (wrongGuesses === unlockThresholds.mekanizma) && isNewGuessAdded;
     const bransNormallyUnlocked = !isWinningGuess && (wrongGuesses === unlockThresholds.brans) && isNewGuessAdded;
 
@@ -404,8 +476,8 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
     const mekJustUnlocked = mekNormallyUnlocked || mekWinUnlocked;
     const bransJustUnlocked = bransNormallyUnlocked || bransWinUnlocked;
 
-    updateColumnHeader("header-mekanizma", "Temel Mekanizma", unlockThresholds.mekanizma, mekJustUnlocked, mekWinUnlocked ? 640 : 0, isAlreadyWonCase);
-    updateColumnHeader("header-brans", "Branş", unlockThresholds.brans, bransJustUnlocked, bransWinUnlocked ? 900 : 0, isAlreadyWonCase);
+    updateColumnHeader("header-mekanizma", "Temel Mekanizma", unlockThresholds.mekanizma, mekJustUnlocked, mekWinUnlocked ? 640 : 0, isAlreadyWonCase, deferAnimations);
+    updateColumnHeader("header-brans", "Branş", unlockThresholds.brans, bransJustUnlocked, bransWinUnlocked ? 900 : 0, isAlreadyWonCase, deferAnimations);
 
     const lastIdx = guessedHistory.length - 1;
 
@@ -414,18 +486,23 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
         const isCorrect = disease.id === targetDisease.id;
 
         const row = document.createElement("div");
-        row.className = `guess-row ${isCorrect ? 'winning-row' : ''}`;
+        row.className = `guess-row ${(isCorrect && !deferAnimations) ? 'winning-row' : ''}`;
 
         const nameStatusClass = isCorrect ? "correct-diagnosis" : "wrong-diagnosis";
         const seyirClass = evaluateSeyir(disease.seyir, targetDisease.seyir);
-        
-        // Kazanıldığında (veya kazanılmış vakaya geri dönüldüğünde) üstteki eski satırların kilitli sütunları da açıktır!
-        const isMekUnlocked = (wrongGuesses >= unlockThresholds.mekanizma || isCorrect || isWinningGuess || isAlreadyWonCase);
+
+        const isMekUnlocked = deferAnimations
+            ? (wrongGuesses >= unlockThresholds.mekanizma && !mekJustUnlocked)
+            : (wrongGuesses >= unlockThresholds.mekanizma || isCorrect || isWinningGuess || isAlreadyWonCase);
+
         const mekanizmaClass = isMekUnlocked
             ? evaluatePrimarySecondary(disease.mekanizma, targetDisease.mekanizma)
             : "cell-locked";
-            
-        const isBransUnlocked = (wrongGuesses >= unlockThresholds.brans || isCorrect || isWinningGuess || isAlreadyWonCase);
+
+        const isBransUnlocked = deferAnimations
+            ? (wrongGuesses >= unlockThresholds.brans && !bransJustUnlocked)
+            : (wrongGuesses >= unlockThresholds.brans || isCorrect || isWinningGuess || isAlreadyWonCase);
+
         const bransClass = isBransUnlocked
             ? evaluatePrimarySecondary(disease.brans, targetDisease.brans)
             : "cell-locked";
@@ -435,7 +512,7 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
             content: disease.name,
             colorClass: nameStatusClass,
             isUnlocked: true,
-            animType: isLatestRow ? "flip" : "none",
+            animType: isLatestRow ? (deferAnimations ? "pre-flip" : "flip") : "none",
             delayMs: 120,
             isNameCell: true
         });
@@ -445,7 +522,7 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
             content: disease.seyir,
             colorClass: seyirClass,
             isUnlocked: true,
-            animType: isLatestRow ? "flip" : "none",
+            animType: isLatestRow ? (deferAnimations ? "pre-flip" : "flip") : "none",
             delayMs: 380
         });
 
@@ -455,9 +532,9 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
         let mekFrontLock = false;
 
         if (isLatestRow && isMekUnlocked) {
-            mekAnimType = "flip";
+            mekAnimType = deferAnimations ? "pre-flip" : "flip";
             mekDelay = 640;
-        } else if (mekJustUnlocked) {
+        } else if (!deferAnimations && mekJustUnlocked) {
             mekAnimType = "shatter";
             mekDelay = mekWinUnlocked ? (640 + index * 120) : (450 + index * 180);
             mekFrontLock = true;
@@ -478,9 +555,9 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
         let bransFrontLock = false;
 
         if (isLatestRow && isBransUnlocked) {
-            bransAnimType = "flip";
+            bransAnimType = deferAnimations ? "pre-flip" : "flip";
             bransDelay = 900;
-        } else if (bransJustUnlocked) {
+        } else if (!deferAnimations && bransJustUnlocked) {
             bransAnimType = "shatter";
             bransDelay = bransWinUnlocked ? (900 + index * 120) : (450 + index * 180);
             bransFrontLock = true;
@@ -500,8 +577,8 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false) {
     });
 }
 
-// Oyun İçi Sonuç ve Faz Geçiş Barını Gösteren Yardımcı Fonksiyon (Input'u silmeden gizler!)
-function showEndBanner(isWin, diagnosisName, isStaticRestore = false) {
+// Oyun İçi Sonuç ve Faz Geçiş Barı
+function showEndBanner(isWin, diagnosisName, isStaticRestore = false, deferAnim = false) {
     if (inputSectionEl) inputSectionEl.style.display = "none";
     autocompleteListEl.innerHTML = "";
 
@@ -512,9 +589,10 @@ function showEndBanner(isWin, diagnosisName, isStaticRestore = false) {
     bannerDiv.id = "end-phase-banner";
     bannerDiv.className = isWin ? "phase-transition-banner" : "phase-transition-banner lost-banner";
     
-    // Vakalar arasında geri dönüldüğünde 3D açılış animasyonunu tekrar oynatmaması için
     if (isStaticRestore) {
         bannerDiv.style.animation = "none";
+    } else if (deferAnim) {
+        bannerDiv.classList.add("clue-awaiting-anim");
     }
 
     if (isWin) {
@@ -533,8 +611,7 @@ function showEndBanner(isWin, diagnosisName, isStaticRestore = false) {
             </div>
             <button class="next-phase-btn" id="retry-case-btn" style="background:#37474f; border-color:#78909c; box-shadow:none;">Bu Vakayı Sıfırla ↻</button>
         `;
-        // Sadece kaybedilen vakayı sıfırlama özelliği (diğer vakaların ilerlemesini silmez!)
-        setTimeout(() => {
+        registerTimeout(() => {
             const retryBtn = document.getElementById("retry-case-btn");
             if (retryBtn) {
                 retryBtn.addEventListener("click", () => {
@@ -552,6 +629,7 @@ function showEndBanner(isWin, diagnosisName, isStaticRestore = false) {
     }
 
     inputWrapperEl.appendChild(bannerDiv);
+    return bannerDiv;
 }
 
 // Doğru bilindiğinde çalışan sıralı koreografi
@@ -559,12 +637,11 @@ function runVictorySequence(diagnosisName) {
     const currentTurn = wrongGuesses + 1;
     const lockedClues = currentCaseData.clues.filter(c => c.turn > currentTurn);
 
-    // Sağdaki son kartın (Branş: 900ms delay + 700ms flip = 1600ms) dönüşü bittiği an!
     const rightRevealDoneTime = 1600;
     const rightPanelFinishTime = 1850; 
     const stepInterval = 450;
 
-    // 1. ADIM: Sağdaki tüm kartlar dönüp açıldığı salisede VAKA #1 ✓, yeşil sayaç, yeşil vaka butonu ve kritik kutuların maviye dönüşü gerçekleşir!
+    // 1. ADIM: Sağdaki yeşil kartların dönüşü bittiği an başlık & sayaç yeşile döner
     registerTimeout(() => {
         isGameWon = true;
         syncStateToMemory();
@@ -581,27 +658,56 @@ function runVictorySequence(diagnosisName) {
         });
     }, rightRevealDoneTime);
 
-    // 2. ADIM: Hemen ardından soldaki kilitli ipuçları sırayla açılır (Kritik olanlar doğrudan koyu mavi açılır)
-    lockedClues.forEach((clue, idx) => {
-        registerTimeout(() => {
-            wrongGuesses = clue.turn - 1;
+    // 2. ADIM: Dikey mobilde her kilitli ipucuna önce kay, sonra aç; masaüstünde standart ritimle aç
+    if (isPortraitScrollMode()) {
+        const revealNextClue = (idx) => {
+            if (idx >= lockedClues.length) {
+                const bannerEl = showEndBanner(true, diagnosisName, false, true);
+                smoothScrollToElement(bannerEl, () => {
+                    bannerEl.classList.remove("clue-awaiting-anim");
+                    void bannerEl.offsetWidth;
+                    isTurnTransitioning = false;
+                }, "center");
+                return;
+            }
+
+            wrongGuesses = lockedClues[idx].turn - 1;
             syncStateToMemory();
-            renderClues(false, false);
-        }, rightPanelFinishTime + (idx * stepInterval));
-    });
+            renderClues(false, false, true);
 
-    // 3. ADIM: En son Tanı Doğrulandı barı açılır
-    const bannerRevealTime = rightPanelFinishTime + (lockedClues.length * stepInterval);
+            const awaitingEl = clinicalFileEl.querySelector(".clue-awaiting-anim");
+            smoothScrollToElement(awaitingEl, () => {
+                if (awaitingEl) {
+                    awaitingEl.classList.remove("clue-awaiting-anim");
+                    void awaitingEl.offsetWidth;
+                    awaitingEl.classList.add("clue-just-unlocked");
+                }
+                registerTimeout(() => revealNextClue(idx + 1), 650);
+            }, "center");
+        };
 
-    registerTimeout(() => {
-        showEndBanner(true, diagnosisName, false);
-    }, bannerRevealTime);
+        registerTimeout(() => revealNextClue(0), rightPanelFinishTime);
+    } else {
+        lockedClues.forEach((clue, idx) => {
+            registerTimeout(() => {
+                wrongGuesses = clue.turn - 1;
+                syncStateToMemory();
+                renderClues(false, false, false);
+            }, rightPanelFinishTime + (idx * stepInterval));
+        });
+
+        const bannerRevealTime = rightPanelFinishTime + (lockedClues.length * stepInterval);
+        registerTimeout(() => {
+            showEndBanner(true, diagnosisName, false, false);
+            isTurnTransitioning = false;
+        }, bannerRevealTime);
+    }
 }
 
 // Tahmin Gönderme İşlemi
 function handleGuess() {
     const state = caseStates[activeCaseIndex];
-    if (state.status === "won" || state.status === "lost") return;
+    if (state.status === "won" || state.status === "lost" || isTurnTransitioning) return;
 
     const query = guessInputEl.value.trim().toLowerCase();
     const matchedDisease = diseaseDB.find(d => d.name.toLowerCase() === query);
@@ -621,51 +727,132 @@ function handleGuess() {
         return;
     }
 
+    const wasKeyboardOpen = (document.activeElement === guessInputEl);
     guessedHistory.push(matchedDisease);
     if (state.status === "unplayed") state.status = "playing";
     syncStateToMemory();
 
     guessInputEl.value = "";
     autocompleteListEl.innerHTML = "";
-    // Dokunmatik cihazlarda (telefon/tablet) Enter ile tahmin yapılsa bile klavyeyi kapat
-    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) {
+
+    // Dokunmatik cihazlarda klavyeyi anında kapat
+    const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (isTouchDevice) {
         guessInputEl.blur();
         if (document.activeElement && document.activeElement !== document.body) {
             document.activeElement.blur();
         }
     }
 
+    const portraitMode = isPortraitScrollMode();
+    const kbWait = (isTouchDevice && wasKeyboardOpen) ? 260 : 60;
+
+    // --- DOĞRU TAHMİN ---
     if (matchedDisease.id === targetDisease.id) {
         guessInputEl.disabled = true;
         submitBtn.disabled = true;
+        isTurnTransitioning = true;
 
-        // Kaçıncı denemede bildiğini (Örn: 4/7) kilitle ki ipuçları açılırken sayaç 7/7'ye değişmesin!
         state.finalAttemptCount = Math.min(wrongGuesses + 1, maxGuesses);
         state.status = "won";
         syncStateToMemory();
 
-        renderMatrix(true, true);
-        if (window.matchMedia("(max-width: 950px) and (orientation: portrait)").matches) {
+        if (portraitMode) {
+            // Önce kartları ön yüzde beklet, matrise yumuşakça kay, kayma bitince 3D dönüşü başlat!
+            renderMatrix(true, true, true);
+            const matrixHeaderEl = document.querySelector(".matrix-header");
             registerTimeout(() => {
-                const winRow = guessesContainerEl.lastElementChild;
-                if (winRow) winRow.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 260);
+                smoothScrollToElement(matrixHeaderEl || guessesContainerEl, () => {
+                    renderMatrix(true, true, false);
+                    runVictorySequence(matchedDisease.name);
+                }, "top");
+            }, kbWait);
+        } else {
+            renderMatrix(true, true, false);
+            runVictorySequence(matchedDisease.name);
         }
-        runVictorySequence(matchedDisease.name);
+        return;
+    }
 
+    // --- YANLIŞ TAHMİN ---
+    wrongGuesses++;
+    syncStateToMemory();
+    updateAttemptBadge();
+
+    const isDefeat = (wrongGuesses >= maxGuesses);
+    const newClueUnlocked = currentCaseData.clues.some(c => c.turn === wrongGuesses + 1);
+    const colUnlocked = (wrongGuesses === unlockThresholds.mekanizma || wrongGuesses === unlockThresholds.brans);
+
+    if (isDefeat) {
+        guessInputEl.disabled = true;
+        submitBtn.disabled = true;
+        state.finalAttemptCount = maxGuesses;
+    }
+
+    if (portraitMode) {
+        isTurnTransitioning = true;
+
+        // Sütun kilidi açılıyorsa veya son hak (kayıp) ise odak: MATRİS
+        if (colUnlocked || isDefeat || !newClueUnlocked) {
+            renderClues(false, false, false);
+            renderMatrix(true, false, true); // Kartlar ve kilitler kayma bitene kadar bekler
+
+            const scrollTarget = colUnlocked
+                ? document.querySelector(".matrix-header")
+                : (guessesContainerEl.lastElementChild || document.querySelector(".matrix-header"));
+            const scrollAlign = colUnlocked ? "top" : "center";
+
+            registerTimeout(() => {
+                smoothScrollToElement(scrollTarget, () => {
+                    renderMatrix(true, false, false);
+
+                    if (isDefeat) {
+                        registerTimeout(() => {
+                            state.status = "lost";
+                            syncStateToMemory();
+                            renderCaseSelector();
+
+                            attemptCounterEl.classList.remove("badge-warning", "badge-danger");
+                            attemptCounterEl.classList.add("badge-lost");
+
+                            mainTitleEl.classList.add("title-lost");
+                            mainTitleEl.innerHTML = `${currentCaseData.caseNumber} <span class="title-status-icon">✕</span>`;
+
+                            const bannerEl = showEndBanner(false, targetDisease.name, false, true);
+                            smoothScrollToElement(bannerEl, () => {
+                                bannerEl.classList.remove("clue-awaiting-anim");
+                                void bannerEl.offsetWidth;
+                                isTurnTransitioning = false;
+                            }, "center");
+                        }, 1600);
+                    } else {
+                        registerTimeout(() => { isTurnTransitioning = false; }, 350);
+                    }
+                }, scrollAlign);
+            }, kbWait);
+        } else {
+            // Yeni ipucu açılan turlar (2, 4, 5, 7): Matrisi sessizce güncelle, yeni ipucuna kay ve gözünün önünde 3D aç!
+            renderMatrix(false, false, false);
+            renderClues(false, false, true);
+
+            const awaitingClueEl = clinicalFileEl.querySelector(".clue-awaiting-anim");
+            registerTimeout(() => {
+                smoothScrollToElement(awaitingClueEl, () => {
+                    if (awaitingClueEl) {
+                        awaitingClueEl.classList.remove("clue-awaiting-anim");
+                        void awaitingClueEl.offsetWidth;
+                        awaitingClueEl.classList.add("clue-just-unlocked");
+                    }
+                    registerTimeout(() => { isTurnTransitioning = false; }, 350);
+                }, "center");
+            }, kbWait);
+        }
     } else {
-        wrongGuesses++;
-        syncStateToMemory();
-        updateAttemptBadge();
-        renderMatrix(true, false);
-        renderClues(false, false);
+        // MASAÜSTÜ VE YATAY MOD (Anında, hızlı akış)
+        renderMatrix(true, false, false);
+        renderClues(false, false, false);
 
-        if (wrongGuesses >= maxGuesses) {
-            guessInputEl.disabled = true;
-            submitBtn.disabled = true;
-            state.finalAttemptCount = maxGuesses;
-
-            // Kaybedildiğinde sağdaki son satırın 3D dönüşü bittiği an (1600ms) VAKA #1 ✕ ve kırmızı sayaç yanar!
+        if (isDefeat) {
             registerTimeout(() => {
                 state.status = "lost";
                 syncStateToMemory();
@@ -677,12 +864,13 @@ function handleGuess() {
                 mainTitleEl.classList.add("title-lost");
                 mainTitleEl.innerHTML = `${currentCaseData.caseNumber} <span class="title-status-icon">✕</span>`;
 
-                showEndBanner(false, targetDisease.name, false);
+                showEndBanner(false, targetDisease.name, false, false);
             }, 1600);
         }
     }
 }
 
+// Otomatik Tamamlama ve Klavye Kısayolları
 let activeAutocompleteIndex = -1;
 
 function updateAutocompleteHighlight(items) {
@@ -694,7 +882,6 @@ function updateAutocompleteHighlight(items) {
     });
 }
 
-// Otomatik Tamamlama Dinleyicisi
 guessInputEl.addEventListener("input", function() {
     const val = this.value.trim().toLowerCase();
     autocompleteListEl.innerHTML = "";
@@ -725,7 +912,6 @@ guessInputEl.addEventListener("input", function() {
 
 submitBtn.addEventListener("click", handleGuess);
 
-// Masaüstü Klavye Kısayolları (Yukarı/Aşağı/Enter/Esc)
 guessInputEl.addEventListener("keydown", function(e) {
     const selectableItems = Array.from(autocompleteListEl.querySelectorAll(".autocomplete-item:not(.already-guessed)"));
 
@@ -740,7 +926,7 @@ guessInputEl.addEventListener("keydown", function(e) {
     } else if (e.key === "Escape") {
         autocompleteListEl.innerHTML = "";
         activeAutocompleteIndex = -1;
-} else if (e.key === "Enter") {
+    } else if (e.key === "Enter") {
         e.preventDefault();
         if (activeAutocompleteIndex >= 0 && selectableItems[activeAutocompleteIndex]) {
             guessInputEl.value = selectableItems[activeAutocompleteIndex].textContent;
@@ -751,15 +937,6 @@ guessInputEl.addEventListener("keydown", function(e) {
         }
     }
 });
-
-// Sadece fare/klavye kullanılan masaüstünde vakaya geçince arama çubuğuna otomatik odaklan
-const originalSwitchCase = switchCase;
-switchCase = function(newIndex) {
-    originalSwitchCase(newIndex);
-    if (window.matchMedia("(pointer: fine)").matches && !guessInputEl.disabled) {
-        guessInputEl.focus();
-    }
-};
 
 // Oyunu Başlat
 initGame();
