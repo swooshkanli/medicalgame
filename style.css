@@ -1909,3 +1909,109 @@ body {
     }
 }
 
+
+/* ==========================================
+   TABLET VE MASAÜSTÜ ÜST PANEL / VAKA SEÇİCİ DÜZENLEMESİ
+   ========================================== */
+
+/* Sol panel başlık alanını tamamen ferahlatıyoruz */
+.panel-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    border-bottom: 2px solid #00acc1;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+}
+
+.panel-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.panel-header h2 {
+    color: #00acc1;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Vaka Seçici Barını (1, 2, 3...) sol panelin üst kısmına özel, şık bir şerit yapıyoruz */
+.case-selector {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: #0e1116;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #222934;
+    width: 100%;
+    overflow-x: auto;
+    justify-content: flex-start;
+}
+
+.case-btn {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #2e3644;
+    background-color: #181c24;
+    color: #78909c;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.case-btn:hover {
+    border-color: #00acc1;
+    color: #e0f7fa;
+    transform: translateY(-1px);
+}
+
+.case-btn.active-case {
+    border-color: #00e5ff;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+    background-color: #1e2936;
+}
+
+.case-btn.case-won {
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    border-color: #66bb6a;
+    color: #ffffff;
+}
+
+.case-btn.case-lost {
+    background: linear-gradient(135deg, #c62828 0%, #7f0000 100%);
+    border-color: #ef5350;
+    color: #ffffff;
+}
+
+/* Bilgisayar ve Tablet (Landscape) için Ekstra Estetik Dokunuşlar */
+@media screen and (min-width: 951px) {
+    /* Masaüstünde sol panel başlığını tek satırda tutp vaka seçiciyi sağ üste veya alta esnetebiliriz */
+    .panel-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .panel-header-top {
+        width: auto;
+    }
+    .case-selector {
+        width: auto;
+        padding: 4px 8px;
+    }
+}
+

@@ -58,18 +58,19 @@ function syncStateToMemory() {
     state.isGameWon = isGameWon;
 }
 
-// Vaka Seçici Butonları sağ üstteki hak sayacının (.status-badges) hemen soluna sabitleyen fonksiyon
+// Vaka Seçici Butonları sol panelin başlık kısmına kusursuz yerleştiren fonksiyon
 function renderCaseSelector() {
     let selectorContainer = document.getElementById("case-selector");
-    
-    // İlk çalışmada sağ üstteki attemptCounterEl (1/7 sayacı) kutusunun hemen soluna yerleştirir
-    if (!selectorContainer) {
+    const panelHeaderEl = document.querySelector(".panel-header");
+
+    // İlk çalışmada panel-header içine özel vaka seçim şeridini ekler
+    if (!selectorContainer && panelHeaderEl) {
         selectorContainer = document.createElement("div");
         selectorContainer.id = "case-selector";
         selectorContainer.className = "case-selector";
-        
-        // Hak sayacının içinde bulunduğu .status-badges kapsayıcısının en başına (sayacın soluna) ekler
-        attemptCounterEl.parentNode.insertBefore(selectorContainer, attemptCounterEl);
+        panelHeaderEl.appendChild(selectorContainer);
+    } else if (!selectorContainer) {
+        return;
     }
 
     selectorContainer.innerHTML = "";
