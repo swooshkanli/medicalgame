@@ -242,10 +242,26 @@ function renderClues(isInitial = false, suppressAnimation = false) {
         clinicalFileEl.appendChild(div);
     });
 
-    if (!isInitial && !suppressAnimation) {
+if (!isInitial && !suppressAnimation) {
+        const isPortraitMobile = window.matchMedia("(max-width: 950px) and (orientation: portrait)").matches;
+        const scrollDelay = isPortraitMobile ? 260 : 100; // Mobilde klavyenin kapanma süresi için pay
+
         registerTimeout(() => {
-            clinicalFileEl.scrollTo({ top: clinicalFileEl.scrollHeight, behavior: 'smooth' });
-        }, 100);
+            if (isPortraitMobile) {
+                const justUnlocked = clinicalFileEl.querySelector(".clue-just-unlocked");
+                if (justUnlocked) {
+                    justUnlocked.scrollIntoView({ behavior: "smooth", block: "center" });
+                } else {
+                    // O turda sol panelde yeni ipucu açılmadıysa (3. ve 6. turlar gibi) yeni tahmin satırına kaydır
+                    const latestRow = guessesContainerEl.lastElementChild;
+                    if (latestRow) {
+                        latestRow.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }
+            } else {
+                clinicalFileEl.scrollTo({ top: clinicalFileEl.scrollHeight, behavior: "smooth" });
+            }
+        }, scrollDelay);
     }
 }
 
@@ -611,6 +627,13 @@ function handleGuess() {
 
     guessInputEl.value = "";
     autocompleteListEl.innerHTML = "";
+    // Dokunmatik cihazlarda (telefon/tablet) Enter ile tahmin yapılsa bile klavyeyi kapat
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) {
+        guessInputEl.blur();
+        if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
+        }
+    }
 
     if (matchedDisease.id === targetDisease.id) {
         guessInputEl.disabled = true;
@@ -622,6 +645,12 @@ function handleGuess() {
         syncStateToMemory();
 
         renderMatrix(true, true);
+        if (window.matchMedia("(max-width: 950px) and (orientation: portrait)").matches) {
+            registerTimeout(() => {
+                const winRow = guessesContainerEl.lastElementChild;
+                if (winRow) winRow.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 260);
+        }
         runVictorySequence(matchedDisease.name);
 
     } else {
@@ -711,9 +740,9 @@ guessInputEl.addEventListener("keydown", function(e) {
     } else if (e.key === "Escape") {
         autocompleteListEl.innerHTML = "";
         activeAutocompleteIndex = -1;
-    } else if (e.key === "Enter") {
+} else if (e.key === "Enter") {
+        e.preventDefault();
         if (activeAutocompleteIndex >= 0 && selectableItems[activeAutocompleteIndex]) {
-            e.preventDefault();
             guessInputEl.value = selectableItems[activeAutocompleteIndex].textContent;
             autocompleteListEl.innerHTML = "";
             activeAutocompleteIndex = -1;
