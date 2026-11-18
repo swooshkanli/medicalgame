@@ -49,6 +49,40 @@ function isPortraitScrollMode() {
     return window.matchMedia("(max-width: 950px) and (orientation: portrait)").matches;
 }
 
+// Bilgisayarda klasik/tok hız, telefon ve tablette seri mobil hız kullanır
+function getAnimTimings() {
+    const isDesktop = window.matchMedia("(hover: hover) and (pointer: fine)").matches && !isPortraitScrollMode();
+
+    if (isDesktop) {
+        return {
+            flip1: 110,           // 1. Kart (Tanı)
+            flip2: 350,           // 2. Kart (Seyir)
+            flip3: 590,           // 3. Kart (Mekanizma)
+            flip4: 830,           // 4. Kart (Branş)
+            shatterNormalBase: 400,
+            shatterNormalStep: 160,
+            shatterWinStep: 110,
+            revealDone: 1540,     // Son kart dönüş bitişi (Başlık ✓ / ✕ ve sayaç anı)
+            victoryStart: 1760,   // Kazanıldığında kilitli ipuçlarının açılmaya başlaması
+            clueStep: 420         // Kazanıldığında ipuçları arası bekleme
+        };
+    }
+
+    // Telefon ve Tablet (Mevcut beğendiğin seri hız — hiç değişmedi)
+    return {
+        flip1: 0,
+        flip2: 220,
+        flip3: 440,
+        flip4: 660,
+        shatterNormalBase: 260,
+        shatterNormalStep: 120,
+        shatterWinStep: 90,
+        revealDone: 1380,
+        victoryStart: 1480,
+        clueStep: 300
+    };
+}
+
 // Hedef elemana seri ve pürüzsüz kayar, bittiği salisede animasyonu tetikler
 function smoothScrollToElement(targetEl, onComplete, align = "center") {
     cancelActiveScroll();
@@ -474,6 +508,7 @@ function create3DCellHTML({ content, colorClass, isUnlocked, animType, delayMs, 
 
 // Sağ Taraftaki Tahmin Matrisini Güncelleme (Atomik Güncelleme + Sıfır Zıplama + Hızlı Kart Ritimleri)
 function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnimations = false) {
+    const t = getAnimTimings();
     const savedScrollY = window.scrollY;
     const state = caseStates[activeCaseIndex];
     const isAlreadyWonCase = (state.status === "won" && !deferAnimations && !isWinningGuess);
@@ -522,7 +557,7 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnim
             colorClass: nameStatusClass,
             isUnlocked: true,
             animType: isLatestRow ? (deferAnimations ? "pre-flip" : "flip") : "none",
-            delayMs: 0,
+            delayMs: t.flip1,
             isNameCell: true
         });
 
@@ -532,7 +567,7 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnim
             colorClass: seyirClass,
             isUnlocked: true,
             animType: isLatestRow ? (deferAnimations ? "pre-flip" : "flip") : "none",
-            delayMs: 220
+            delayMs: t.flip2
         });
 
         // 3. MEKANİZMA KUTUSU (440ms)
@@ -540,14 +575,14 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnim
         let mekDelay = 0;
         let mekFrontLock = false;
 
-        if (isLatestRow && isMekUnlocked) {
-            mekAnimType = deferAnimations ? "pre-flip" : "flip";
-            mekDelay = 440;
-        } else if (!deferAnimations && mekJustUnlocked) {
-            mekAnimType = "shatter";
-            mekDelay = mekWinUnlocked ? (440 + index * 90) : (260 + index * 120);
-            mekFrontLock = true;
-        }
+if (isLatestRow && isMekUnlocked) {
+          mekAnimType = deferAnimations ? "pre-flip" : "flip";
+          mekDelay = t.flip3;
+      } else if (!deferAnimations && mekJustUnlocked) {
+          mekAnimType = "shatter";
+          mekDelay = mekWinUnlocked ? (t.flip3 + index * t.shatterWinStep) : (t.shatterNormalBase + index * t.shatterNormalStep);
+          mekFrontLock = true;
+      }
 
         const mekCellHTML = create3DCellHTML({
             content: formatBoxText(disease.mekanizma, isCorrect),
@@ -563,14 +598,14 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnim
         let bransDelay = 0;
         let bransFrontLock = false;
 
-        if (isLatestRow && isBransUnlocked) {
-            bransAnimType = deferAnimations ? "pre-flip" : "flip";
-            bransDelay = 660;
-        } else if (!deferAnimations && bransJustUnlocked) {
-            bransAnimType = "shatter";
-            bransDelay = bransWinUnlocked ? (660 + index * 90) : (260 + index * 120);
-            bransFrontLock = true;
-        }
+if (isLatestRow && isBransUnlocked) {
+          bransAnimType = deferAnimations ? "pre-flip" : "flip";
+          bransDelay = t.flip4;
+      } else if (!deferAnimations && bransJustUnlocked) {
+          bransAnimType = "shatter";
+          bransDelay = bransWinUnlocked ? (t.flip4 + index * t.shatterWinStep) : (t.shatterNormalBase + index * t.shatterNormalStep);
+          bransFrontLock = true;
+      }
 
         const bransCellHTML = create3DCellHTML({
             content: formatBoxText(disease.brans, isCorrect),
@@ -589,8 +624,8 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnim
     guessesContainerEl.replaceChildren(fragment);
 
     // 2. Başlık kilit açılma animasyonlarını satırlar yerleştikten SONRA tetikle
-    updateColumnHeader("header-mekanizma", "Temel Mekanizma", unlockThresholds.mekanizma, mekJustUnlocked, mekWinUnlocked ? 440 : 0, isAlreadyWonCase, deferAnimations);
-    updateColumnHeader("header-brans", "Branş", unlockThresholds.brans, bransJustUnlocked, bransWinUnlocked ? 660 : 0, isAlreadyWonCase, deferAnimations);
+updateColumnHeader("header-mekanizma", "Temel Mekanizma", unlockThresholds.mekanizma, mekJustUnlocked, mekWinUnlocked ? t.flip3 : 0, isAlreadyWonCase, deferAnimations);
+  updateColumnHeader("header-brans", "Branş", unlockThresholds.brans, bransJustUnlocked, bransWinUnlocked ? t.flip4 : 0, isAlreadyWonCase, deferAnimations);
 
     // 3. Dikey mobilde tarayıcının scroll pozisyonunu yukarı zıplatmasını engelle
     if (isPortraitScrollMode() && isNewGuessAdded && !deferAnimations) {
@@ -658,9 +693,10 @@ function runVictorySequence(diagnosisName) {
     const currentTurn = wrongGuesses + 1;
     const lockedClues = currentCaseData.clues.filter(c => c.turn > currentTurn);
 
-    const rightRevealDoneTime = 1380;
-    const rightPanelFinishTime = 1480;
-    const stepInterval = 300;
+const t = getAnimTimings();
+    const rightRevealDoneTime = t.revealDone;
+    const rightPanelFinishTime = t.victoryStart;
+    const stepInterval = t.clueStep;
 
     // 1. ADIM: Sağdaki yeşil kartların dönüşü bittiği an başlık & sayaç yeşile döner
     registerTimeout(() => {
@@ -881,8 +917,8 @@ function handleGuess() {
                 mainTitleEl.classList.add("title-lost");
                 mainTitleEl.innerHTML = `${currentCaseData.caseNumber} <span class="title-status-icon">✕</span>`;
 
-                showEndBanner(false, targetDisease.name, false, false);
-            }, 1380);
+showEndBanner(false, targetDisease.name, false, false);
+            }, getAnimTimings().revealDone);
         }
     }
 }
