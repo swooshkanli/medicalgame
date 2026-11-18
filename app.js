@@ -477,9 +477,9 @@ function create3DCellHTML({ content, colorClass, isUnlocked, animType, delayMs, 
     `;
 }
 
-// Sağ Taraftaki Tahmin Matrisini Güncelleme (deferAnimations: dikey mobilde kayma bitene kadar kartları/kilitleri bekletir)
+// Sağ Taraftaki Tahmin Matrisini Güncelleme (Sıfır Zıplama / Atomik Güncelleme)
 function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnimations = false) {
-    guessesContainerEl.innerHTML = "";
+    const savedScrollY = window.scrollY;
     const state = caseStates[activeCaseIndex];
     const isAlreadyWonCase = (state.status === "won" && !deferAnimations && !isWinningGuess);
 
@@ -492,10 +492,8 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnim
     const mekJustUnlocked = mekNormallyUnlocked || mekWinUnlocked;
     const bransJustUnlocked = bransNormallyUnlocked || bransWinUnlocked;
 
-    updateColumnHeader("header-mekanizma", "Temel Mekanizma", unlockThresholds.mekanizma, mekJustUnlocked, mekWinUnlocked ? 640 : 0, isAlreadyWonCase, deferAnimations);
-    updateColumnHeader("header-brans", "Branş", unlockThresholds.brans, bransJustUnlocked, bransWinUnlocked ? 900 : 0, isAlreadyWonCase, deferAnimations);
-
     const lastIdx = guessedHistory.length - 1;
+    const fragment = document.createDocumentFragment();
 
     guessedHistory.forEach((disease, index) => {
         const isLatestRow = isNewGuessAdded && (index === lastIdx);
@@ -589,8 +587,20 @@ function renderMatrix(isNewGuessAdded = false, isWinningGuess = false, deferAnim
         });
 
         row.innerHTML = nameCellHTML + seyirCellHTML + mekCellHTML + bransCellHTML;
-        guessesContainerEl.appendChild(row);
+        fragment.appendChild(row);
     });
+
+    // 1. Satırları sıfırlamadan tek hamlede değiştir (Sayfa boyu asla 0'a düşmez!)
+    guessesContainerEl.replaceChildren(fragment);
+
+    // 2. Başlık kilit açılma animasyonlarını satırlar yerleştikten SONRA tetikle
+    updateColumnHeader("header-mekanizma", "Temel Mekanizma", unlockThresholds.mekanizma, mekJustUnlocked, mekWinUnlocked ? 640 : 0, isAlreadyWonCase, deferAnimations);
+    updateColumnHeader("header-brans", "Branş", unlockThresholds.brans, bransJustUnlocked, bransWinUnlocked ? 900 : 0, isAlreadyWonCase, deferAnimations);
+
+    // 3. Dikey mobilde Safari'nin herhangi bir ufak kaydırma düzeltmesini engelle, kamerayı satırda kilitle
+    if (isPortraitScrollMode() && isNewGuessAdded && !deferAnimations) {
+        window.scrollTo(0, savedScrollY);
+    }
 }
 
 // Oyun İçi Sonuç ve Faz Geçiş Barı
