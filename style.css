@@ -2308,3 +2308,83 @@ body {
         min-height: 36px !important;
     }
 }
+
+/* ==========================================
+   UZUN HÜCRE METİNLERİ & DİKEY TELEFON KELİME BÖLÜNME ÇÖZÜMÜ
+   ========================================== */
+
+/* Kelimeleri ortadan bölme, sadece gerçekten tek kelime kutudan taşarsa kır */
+.cell-face {
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
+}
+
+/* Masaüstü ve tablette çok uzun tanı isimlerinin taşmaması için hafif küçültme */
+.cell-face.cell-text-sm {
+    font-size: 0.78rem !important;
+    line-height: 1.2 !important;
+}
+
+.cell-face.cell-text-xs {
+    font-size: 0.72rem !important;
+    line-height: 1.15 !important;
+    padding: 6px 5px !important;
+}
+
+/* DİKEY TELEFONLAR (<= 560px): Seyir ve uzun tanılar için ekstra ferah kolon ve yükseklik */
+@media screen and (max-width: 560px) and (orientation: portrait) {
+    body {
+        padding: 5px !important;
+    }
+
+    .right-panel {
+        padding: 18px 6px 42px 6px !important;
+    }
+
+    .guesses-container {
+        padding: 6px 2px !important;
+    }
+
+    /* Seyir kolonunu genişlettik ki "Kronik Zemininde Akut" rahat sığsın */
+    .matrix-header,
+    .guess-row {
+        grid-template-columns: 1.38fr 0.96fr 1.0fr 0.96fr !important;
+        gap: 4px !important;
+    }
+
+    .cell-3d-wrapper {
+        height: 72px !important;
+        min-height: 72px !important;
+    }
+
+    .cell-face {
+        padding: 5px 3px !important;
+        font-size: 0.7rem !important;
+        line-height: 1.18 !important;
+        letter-spacing: -0.1px !important;
+    }
+
+    .cell-face.cell-text-sm {
+        font-size: 0.62rem !important;
+        line-height: 1.14 !important;
+        padding: 4px 3px !important;
+    }
+
+    .cell-face.cell-text-xs {
+        font-size: 0.56rem !important;
+        line-height: 1.12 !important;
+        padding: 3px 2px !important;
+        letter-spacing: -0.25px !important;
+    }
+
+    .cell-name {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+        word-spacing: 0px !important;
+    }
+
+    .sub-mech {
+        font-size: 0.56rem !important;
+    }
+}

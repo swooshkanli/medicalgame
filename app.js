@@ -423,6 +423,22 @@ function updateColumnHeader(elementId, title, threshold, justUnlocked, unlockDel
     }
 }
 
+// Uzun tanı/seyir/branş metinlerinin dar telefonlarda bölünmeden sığması için ölçek sınıfı belirler
+function getCellLengthClass(htmlContent) {
+    const plainText = htmlContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    const longestWord = plainText
+        .split(/[\s/()+-]+/)
+        .reduce((max, word) => Math.max(max, word.length), 0);
+
+    if (plainText.length > 28 || longestWord > 14) {
+        return "cell-text-xs";
+    }
+    if (plainText.length > 16 || longestWord > 10) {
+        return "cell-text-sm";
+    }
+    return "";
+}
+
 // 3 Boyutlu Çift Yüzlü Hücre Oluşturucu
 function create3DCellHTML({ content, colorClass, isUnlocked, animType, delayMs, isNameCell = false, frontHasLock = false }) {
     if (!isUnlocked) {
@@ -434,11 +450,11 @@ function create3DCellHTML({ content, colorClass, isUnlocked, animType, delayMs, 
     }
 
     const extraNameClass = isNameCell ? "cell-name" : "";
+    const lengthClass = getCellLengthClass(content);
     let wrapperClass = "flipped-static";
     let styleAttr = "";
 
     if (animType === "pre-flip") {
-        // Kayma bitene kadar ön yüzde (dönmeden) bekler
         wrapperClass = "";
     } else if (animType === "flip") {
         wrapperClass = "flip-card";
@@ -455,8 +471,8 @@ function create3DCellHTML({ content, colorClass, isUnlocked, animType, delayMs, 
 
     return `
         <div class="cell-3d-wrapper ${wrapperClass}" ${styleAttr}>
-            <div class="cell-face cell-front ${extraNameClass} ${frontLockClass}">${frontContent}</div>
-            <div class="cell-face cell-back ${extraNameClass} ${colorClass}">${content}</div>
+            <div class="cell-face cell-front ${extraNameClass} ${frontLockClass} ${frontHasLock ? '' : lengthClass}">${frontContent}</div>
+            <div class="cell-face cell-back ${extraNameClass} ${colorClass} ${lengthClass}">${content}</div>
         </div>
     `;
 }
@@ -758,14 +774,14 @@ function handleGuess() {
         syncStateToMemory();
 
         if (portraitMode) {
-            // Önce kartları ön yüzde beklet, matrise yumuşakça kay, kayma bitince 3D dönüşü başlat!
+            // Son tahmin satırını ön yüzde beklet, doğrudan o satıra ortalan ve 3D dönüşü başlat
             renderMatrix(true, true, true);
-            const matrixHeaderEl = document.querySelector(".matrix-header");
+            const latestRowEl = guessesContainerEl.lastElementChild;
             registerTimeout(() => {
-                smoothScrollToElement(matrixHeaderEl || guessesContainerEl, () => {
+                smoothScrollToElement(latestRowEl || guessesContainerEl, () => {
                     renderMatrix(true, true, false);
                     runVictorySequence(matchedDisease.name);
-                }, "top");
+                }, "center");
             }, kbWait);
         } else {
             renderMatrix(true, true, false);
@@ -781,7 +797,6 @@ function handleGuess() {
 
     const isDefeat = (wrongGuesses >= maxGuesses);
     const newClueUnlocked = currentCaseData.clues.some(c => c.turn === wrongGuesses + 1);
-    const colUnlocked = (wrongGuesses === unlockThresholds.mekanizma || wrongGuesses === unlockThresholds.brans);
 
     if (isDefeat) {
         guessInputEl.disabled = true;
@@ -792,18 +807,32 @@ function handleGuess() {
     if (portraitMode) {
         isTurnTransitioning = true;
 
-        // Sütun kilidi açılıyorsa veya son hak (kayıp) ise odak: MATRİS
-        if (colUnlocked || isDefeat || !newClueUnlocked) {
-            renderClues(false, false, false);
-            renderMatrix(true, false, true); // Kartlar ve kilitler kayma bitene kadar bekler
+        if (newClueUnlocked && !isDefeat) {
+            // 1. DURUM: Yeni bir SOL ipucu açıldı -> İpucuna kay, sonra HEM ipucunu aç HEM son tahmin kartlarını döndür!
+            renderClues(false, false, true);
+            renderMatrix(true, false, true);
 
-            const scrollTarget = colUnlocked
-                ? document.querySelector(".matrix-header")
-                : (guessesContainerEl.lastElementChild || document.querySelector(".matrix-header"));
-            const scrollAlign = colUnlocked ? "top" : "center";
-
+            const awaitingClueEl = clinicalFileEl.querySelector(".clue-awaiting-anim");
             registerTimeout(() => {
-                smoothScrollToElement(scrollTarget, () => {
+                smoothScrollToElement(awaitingClueEl, () => {
+                    if (awaitingClueEl) {
+                        awaitingClueEl.classList.remove("clue-awaiting-anim");
+                        void awaitingClueEl.offsetWidth;
+                        awaitingClueEl.classList.add("clue-just-unlocked");
+                    }
+                    // Sağ taraftaki tahmin satırının da 3D dönüş animasyonunu tetikle
+                    renderMatrix(true, false, false);
+                    registerTimeout(() => { isTurnTransitioning = false; }, 350);
+                }, "center");
+            }, kbWait);
+        } else {
+            // 2. DURUM: Yeni sol ipucu yok (veya son hak/kayıp) -> Başlığa değil doğrudan SON TAHMİN satırına kay ve dönüşü izle!
+            renderClues(false, false, false);
+            renderMatrix(true, false, true);
+
+            const latestRowEl = guessesContainerEl.lastElementChild;
+            registerTimeout(() => {
+                smoothScrollToElement(latestRowEl || guessesContainerEl, () => {
                     renderMatrix(true, false, false);
 
                     if (isDefeat) {
@@ -828,27 +857,11 @@ function handleGuess() {
                     } else {
                         registerTimeout(() => { isTurnTransitioning = false; }, 350);
                     }
-                }, scrollAlign);
-            }, kbWait);
-        } else {
-            // Yeni ipucu açılan turlar (2, 4, 5, 7): Matrisi sessizce güncelle, yeni ipucuna kay ve gözünün önünde 3D aç!
-            renderMatrix(false, false, false);
-            renderClues(false, false, true);
-
-            const awaitingClueEl = clinicalFileEl.querySelector(".clue-awaiting-anim");
-            registerTimeout(() => {
-                smoothScrollToElement(awaitingClueEl, () => {
-                    if (awaitingClueEl) {
-                        awaitingClueEl.classList.remove("clue-awaiting-anim");
-                        void awaitingClueEl.offsetWidth;
-                        awaitingClueEl.classList.add("clue-just-unlocked");
-                    }
-                    registerTimeout(() => { isTurnTransitioning = false; }, 350);
                 }, "center");
             }, kbWait);
         }
     } else {
-        // MASAÜSTÜ VE YATAY MOD (Anında, hızlı akış)
+        // MASAÜSTÜ VE YATAY MOD
         renderMatrix(true, false, false);
         renderClues(false, false, false);
 
