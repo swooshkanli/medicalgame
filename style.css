@@ -1746,219 +1746,82 @@ body {
 
 
 /* ==========================================
-   MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE TASARIM)
-   ========================================== */
-@media screen and (max-width: 950px) {
-    /* 1. Sabit 100vh ekran kilidini kaldır, dikey doğal kaydırmaya izin ver */
-    body {
-        height: auto !important;
-        min-height: 100dvh !important;
-        align-items: flex-start !important;
-        padding: 8px !important;
-        overflow-y: auto !important;
-    }
-
-    /* 2. Yan yana olan panelleri alt alta (Sol Panel üstte, Matris altta) diz */
-    .game-container {
-        flex-direction: column !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: calc(100dvh - 16px) !important;
-        overflow: visible !important;
-        border-radius: 10px !important;
-    }
-
-    /* 3. ÜST PANEL (Klinik İpuçları ve Arama Çubuğu) */
-    .left-panel {
-        border-right: none !important;
-        border-bottom: 2px solid #2a2f3a !important;
-        padding: 16px 14px !important;
-        width: 100% !important;
-    }
-
-    .panel-header {
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-        padding-bottom: 12px !important;
-        margin-bottom: 14px !important;
-    }
-
-    .panel-header h2 {
-        font-size: 1.3rem !important;
-    }
-
-    .status-badges {
-        width: 100% !important;
-        justify-content: space-between !important;
-        gap: 8px !important;
-    }
-
-    /* Vaka seçici butonlar telefonda taşarsa yatay kaydırılabilsin */
-    .case-selector {
-        overflow-x: auto !important;
-        max-width: calc(100% - 85px) !important;
-        padding: 4px !important;
-    }
-
-    .case-btn {
-        min-width: 28px !important;
-        height: 28px !important;
-        font-size: 0.78rem !important;
-    }
-
-    .badge {
-        font-size: 1rem !important;
-        padding: 6px 12px !important;
-        min-width: 68px !important;
-    }
-
-    /* İpucu kutuları mobilde sıkışmasın, kendi içinde rahat okunsun */
-    .clinical-file {
-        max-height: none !important;
-        overflow: visible !important;
-        -webkit-mask-image: none !important;
-        mask-image: none !important;
-        padding: 4px 0 !important;
-        margin: 0 !important;
-        gap: 10px !important;
-    }
-
-    .lore-entry {
-        padding: 12px !important;
-        font-size: 0.88rem !important;
-    }
-
-    /* Arama ve Tahmin Butonu */
-    .input-wrapper {
-        margin-top: 14px !important;
-    }
-
-    #guess-input {
-        padding: 12px !important;
-        font-size: 16px !important; /* iOS Safari'nin input'a tıklayınca ekranı otomatik zoomlamasını engeller! */
-    }
-
-    #submit-guess {
-        padding: 0 18px !important;
-        font-size: 0.9rem !important;
-    }
-
-    /* Tanı Doğrulandı / Vaka Devredildi Barı Mobil Uyumu */
-    .phase-transition-banner {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        text-align: center !important;
-        gap: 12px !important;
-        padding: 14px !important;
-    }
-
-    .next-phase-btn {
-        width: 100% !important;
-        padding: 12px !important;
-    }
-
-    /* 4. ALT PANEL (Tahmin Matrisi) */
-    .right-panel {
-        padding: 16px 10px 28px 10px !important;
-        width: 100% !important;
-        min-height: 280px !important;
-    }
-
-    /* 4 Sütunlu Matrisi Telefon Ekranına Sığdırma */
-    .matrix-header,
-    .guess-row {
-        grid-template-columns: 1.35fr 0.9fr 1.05fr 0.95fr !important;
-        gap: 5px !important;
-    }
-
-    .matrix-header {
-        font-size: 0.72rem !important;
-        min-height: 40px !important;
-        padding-bottom: 10px !important;
-    }
-
-    .header-lock-badge {
-        position: static !important;
-        margin-left: 3px !important;
-        font-size: 0.75rem !important;
-    }
-
-    .header-subtext {
-        font-size: 0.6rem !important;
-    }
-
-    /* 3D Kartların Yükseklik ve Font Ayarı */
-    .cell-3d-wrapper {
-        height: 64px !important;
-        min-height: 64px !important;
-    }
-
-    .cell-face {
-        padding: 6px 4px !important;
-        font-size: 0.72rem !important;
-        line-height: 1.15 !important;
-    }
-
-    .cell-name {
-        padding-left: 4px !important;
-        word-spacing: 1px !important;
-    }
-
-    .sub-mech {
-        font-size: 0.62rem !important;
-    }
-}
-
-
-/* ==========================================
-   TABLET VE MASAÜSTÜ ÜST PANEL / VAKA SEÇİCİ DÜZENLEMESİ
+   EVRENSEL BAŞLIK, KOMPAKT VAKA SEÇİCİ & 4 PLATFORM UYUMU
    ========================================== */
 
-/* Sol panel başlık alanını tamamen ferahlatıyoruz */
+/* 1. BAŞLIK YAPISI: 1. Satır (Vaka No + Sayaç), 2. Satır (Kompakt Vaka Butonları) */
 .panel-header {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    row-gap: 10px !important;
+    column-gap: 12px !important;
     border-bottom: 2px solid #00acc1;
-    padding-bottom: 14px;
-    margin-bottom: 18px;
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
 }
 
-.panel-header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+/* Başlık (VAKA #1 ✓) asla 2 satıra kırılmaz */
+#main-title {
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    line-height: 1.1 !important;
+    flex-shrink: 0 !important;
 }
 
-.panel-header h2 {
-    color: #00acc1;
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+/* Hak sayacı (1 / 7) her zaman sağ üstte ve tek satırda kalır */
+.status-badges {
+    width: auto !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
 }
 
-/* Vaka Seçici Barını (1, 2, 3...) sol panelin üst kısmına özel, şık bir şerit yapıyoruz */
+#attempt-counter,
+.badge {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    min-width: 72px !important;
+    text-align: center !important;
+    padding: 6px 14px !important;
+    font-size: 1.1rem !important;
+}
+
+/* 2. Satır Taşıyıcısı: Şeffaf, sadece vaka seçiciyi alt satıra indirir */
+.case-selector-row {
+    flex: 0 0 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-width: 0 !important;
+}
+
+/* Vaka Seçici Kutusu: Sadece butonlar kadar genişler (asla boşlukla uzamaz!) */
 .case-selector {
-    display: flex;
-    gap: 6px;
-    align-items: center;
+    display: inline-flex !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    gap: 6px !important;
+    align-items: center !important;
     background: #0e1116;
-    padding: 6px 10px;
+    padding: 5px 6px !important;
     border-radius: 8px;
     border: 1px solid #222934;
-    width: 100%;
-    overflow-x: auto;
-    justify-content: flex-start;
+    overflow-x: auto !important;
+    scrollbar-width: none; /* Firefox'ta çirkin scrollbar gizler */
+}
+.case-selector::-webkit-scrollbar {
+    display: none;
 }
 
 .case-btn {
-    min-width: 32px;
-    height: 32px;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
     border-radius: 6px;
     border: 1px solid #2e3644;
     background-color: #181c24;
@@ -1998,20 +1861,373 @@ body {
     color: #ffffff;
 }
 
-/* Bilgisayar ve Tablet (Landscape) için Ekstra Estetik Dokunuşlar */
-@media screen and (min-width: 951px) {
-    /* Masaüstünde sol panel başlığını tek satırda tutp vaka seçiciyi sağ üste veya alta esnetebiliriz */
-    .panel-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
+/* Masaüstü Autocomplete Klavye Seçim Vurgusu */
+.autocomplete-item.autocomplete-active {
+    background-color: #00acc1 !important;
+    color: #ffffff !important;
+}
+
+/* ==========================================
+   PLATFORM 1: MASAÜSTÜ RAFİNASYONU (1250px ve üzeri)
+   ========================================== */
+@media screen and (min-width: 1250px) {
+    .game-container {
+        max-width: 1620px;
     }
-    .panel-header-top {
-        width: auto;
+
+    .autocomplete-items {
+        backdrop-filter: blur(8px);
+        background-color: rgba(28, 33, 41, 0.96);
     }
-    .case-selector {
-        width: auto;
-        padding: 4px 8px;
+
+    #submit-guess:active {
+        transform: scale(0.97);
     }
 }
 
+/* ==========================================
+   PLATFORM 2: YATAY TABLET (951px - 1249px arası)
+   ========================================== */
+@media screen and (min-width: 951px) and (max-width: 1249px) {
+    .left-panel {
+        padding: 18px !important;
+    }
+
+    .right-panel {
+        padding: 18px 16px !important;
+    }
+
+    .panel-header h2 {
+        font-size: 1.4rem !important;
+    }
+
+    .matrix-header,
+    .guess-row {
+        grid-template-columns: 1.55fr 0.95fr 1.15fr 1.05fr !important;
+        gap: 8px !important;
+    }
+
+    .cell-face {
+        font-size: 0.8rem !important;
+        padding: 8px 6px !important;
+    }
+}
+
+/* ==========================================
+   PLATFORM 3: DİKEY TELEFON & DİKEY TABLET (Portrait)
+   ========================================== */
+@media screen and (max-width: 950px) and (orientation: portrait) {
+    body {
+        height: auto !important;
+        min-height: 100dvh !important;
+        align-items: flex-start !important;
+        padding: 8px !important;
+        overflow-y: auto !important;
+    }
+
+    .game-container {
+        flex-direction: column !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: calc(100dvh - 16px) !important;
+        overflow: visible !important;
+        border-radius: 10px !important;
+    }
+
+    .left-panel {
+        border-right: none !important;
+        border-bottom: 2px solid #2a2f3a !important;
+        padding: 16px 14px !important;
+        width: 100% !important;
+    }
+
+    .panel-header h2 {
+        font-size: 1.35rem !important;
+    }
+
+    #attempt-counter,
+    .badge {
+        font-size: 1rem !important;
+        padding: 5px 12px !important;
+        min-width: 66px !important;
+    }
+
+    .clinical-file {
+        max-height: none !important;
+        overflow: visible !important;
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        padding: 4px 0 !important;
+        margin: 0 !important;
+        gap: 10px !important;
+    }
+
+    .lore-entry {
+        padding: 13px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .input-wrapper {
+        margin-top: 14px !important;
+    }
+
+    #guess-input {
+        padding: 12px !important;
+        font-size: 16px !important; /* iOS otomatik zoom engeli */
+    }
+
+    #submit-guess {
+        padding: 0 18px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .phase-transition-banner {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        text-align: center !important;
+        gap: 12px !important;
+        padding: 14px !important;
+    }
+
+    .next-phase-btn {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    .right-panel {
+        padding: 16px 10px 42px 10px !important; /* Safari alt bar payı */
+        width: 100% !important;
+        min-height: 260px !important;
+    }
+
+    .matrix-header,
+    .guess-row {
+        grid-template-columns: 1.35fr 0.85fr 1.05fr 0.95fr !important;
+        gap: 5px !important;
+    }
+
+    .matrix-header {
+        font-size: 0.72rem !important;
+        min-height: 38px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .header-lock-badge {
+        position: static !important;
+        margin-left: 3px !important;
+        font-size: 0.72rem !important;
+    }
+
+    .header-subtext {
+        font-size: 0.6rem !important;
+    }
+
+    .cell-3d-wrapper {
+        height: 62px !important;
+        min-height: 62px !important;
+    }
+
+    .cell-face {
+        padding: 6px 4px !important;
+        font-size: 0.72rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .cell-name {
+        padding-left: 4px !important;
+        word-spacing: 1px !important;
+    }
+
+    .sub-mech {
+        font-size: 0.62rem !important;
+    }
+}
+
+/* ==========================================
+   PLATFORM 4: YATAY TELEFON (Masaüstü Gibi Yan Yana Kompakt Split-Screen!)
+   ========================================== */
+@media screen and (max-height: 540px) and (orientation: landscape) {
+    body {
+        height: 100dvh !important;
+        overflow: hidden !important;
+        padding: 4px max(6px, env(safe-area-inset-right)) 4px max(6px, env(safe-area-inset-left)) !important;
+    }
+
+    .game-container {
+        flex-direction: row !important;
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+
+    /* SOL PANEL: Kompakt Klinik Dosya */
+    .left-panel {
+        flex: 1.05 !important;
+        padding: 10px 12px !important;
+        border-right: 1px solid #2a2f3a !important;
+        border-bottom: none !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .panel-header {
+        row-gap: 6px !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .panel-header h2 {
+        font-size: 1.05rem !important;
+    }
+
+    .sub-header {
+        display: none !important; /* Yatay telefonda dikey alan kazandırır */
+    }
+
+    #attempt-counter,
+    .badge {
+        font-size: 0.82rem !important;
+        padding: 3px 10px !important;
+        min-width: 54px !important;
+        border-radius: 6px !important;
+    }
+
+    .case-selector {
+        padding: 3px 4px !important;
+        gap: 4px !important;
+    }
+
+    .case-btn {
+        width: 24px !important;
+        min-width: 24px !important;
+        height: 24px !important;
+        font-size: 0.72rem !important;
+    }
+
+    .clinical-file {
+        gap: 8px !important;
+        padding: 8px 10px 12px 10px !important;
+        margin: 0 -10px !important;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%) !important;
+        mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%) !important;
+    }
+
+    .lore-entry {
+        padding: 8px 10px !important;
+        font-size: 0.76rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .lore-entry.locked-clue {
+        padding: 8px 10px !important;
+    }
+
+    .entry-title {
+        font-size: 0.68rem !important;
+        margin-bottom: 3px !important;
+    }
+
+    .unlock-countdown {
+        font-size: 0.65rem !important;
+        padding: 2px 6px !important;
+    }
+
+    .input-wrapper {
+        margin-top: 8px !important;
+    }
+
+    #guess-input {
+        padding: 8px 10px !important;
+        font-size: 14px !important;
+    }
+
+    #submit-guess {
+        padding: 0 14px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .autocomplete-items {
+        max-height: 120px !important;
+    }
+
+    .autocomplete-item {
+        padding: 7px 10px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .phase-transition-banner {
+        padding: 8px 10px !important;
+        gap: 8px !important;
+    }
+
+    .banner-text h4 {
+        font-size: 0.76rem !important;
+    }
+
+    .banner-text p {
+        font-size: 0.68rem !important;
+    }
+
+    .next-phase-btn {
+        padding: 6px 10px !important;
+        font-size: 0.72rem !important;
+    }
+
+    /* SAĞ PANEL: Kompakt 4 Sütunlu Masaüstü Matrisi */
+    .right-panel {
+        flex: 1.15 !important;
+        padding: 10px 10px !important;
+        min-width: 0 !important;
+        height: 100% !important;
+    }
+
+    .matrix-header,
+    .guess-row {
+        grid-template-columns: 1.45fr 0.85fr 1.1fr 0.95fr !important;
+        gap: 5px !important;
+    }
+
+    .matrix-header {
+        font-size: 0.68rem !important;
+        min-height: 30px !important;
+        padding-bottom: 6px !important;
+    }
+
+    .header-lock-badge {
+        position: static !important;
+        margin-left: 2px !important;
+        font-size: 0.68rem !important;
+    }
+
+    .header-subtext {
+        font-size: 0.56rem !important;
+        margin-top: 1px !important;
+    }
+
+    .guesses-container {
+        margin-top: 6px !important;
+        gap: 6px !important;
+        padding: 4px 2px !important;
+    }
+
+    .cell-3d-wrapper {
+        height: 44px !important;
+        min-height: 44px !important;
+    }
+
+    .cell-face {
+        padding: 4px 3px !important;
+        font-size: 0.66rem !important;
+        line-height: 1.15 !important;
+        gap: 1px !important;
+    }
+
+    .cell-name {
+        word-spacing: 1px !important;
+    }
+
+    .sub-mech {
+        font-size: 0.56rem !important;
+    }
+}

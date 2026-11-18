@@ -60,19 +60,24 @@ function syncStateToMemory() {
 
 // Vaka Seçici Butonları sol panelin başlık kısmına kusursuz yerleştiren fonksiyon
 function renderCaseSelector() {
+    let selectorRow = document.getElementById("case-selector-row");
     let selectorContainer = document.getElementById("case-selector");
     const panelHeaderEl = document.querySelector(".panel-header");
 
-    // İlk çalışmada panel-header içine özel vaka seçim şeridini ekler
-    if (!selectorContainer && panelHeaderEl) {
+    if (!selectorRow && panelHeaderEl) {
+        selectorRow = document.createElement("div");
+        selectorRow.id = "case-selector-row";
+        selectorRow.className = "case-selector-row";
+
         selectorContainer = document.createElement("div");
         selectorContainer.id = "case-selector";
         selectorContainer.className = "case-selector";
-        panelHeaderEl.appendChild(selectorContainer);
-    } else if (!selectorContainer) {
-        return;
+
+        selectorRow.appendChild(selectorContainer);
+        panelHeaderEl.appendChild(selectorRow);
     }
 
+    if (!selectorContainer) return;
     selectorContainer.innerHTML = "";
 
     casesDB.forEach((c, idx) => {
@@ -649,10 +654,22 @@ function handleGuess() {
     }
 }
 
+let activeAutocompleteIndex = -1;
+
+function updateAutocompleteHighlight(items) {
+    items.forEach((item, idx) => {
+        item.classList.toggle("autocomplete-active", idx === activeAutocompleteIndex);
+        if (idx === activeAutocompleteIndex) {
+            item.scrollIntoView({ block: "nearest" });
+        }
+    });
+}
+
 // Otomatik Tamamlama Dinleyicisi
 guessInputEl.addEventListener("input", function() {
     const val = this.value.trim().toLowerCase();
     autocompleteListEl.innerHTML = "";
+    activeAutocompleteIndex = -1;
     if (!val) return;
 
     const matches = diseaseDB.filter(d => d.name.toLowerCase().includes(val));
@@ -669,6 +686,7 @@ guessInputEl.addEventListener("input", function() {
             item.addEventListener("click", function() {
                 guessInputEl.value = d.name;
                 autocompleteListEl.innerHTML = "";
+                activeAutocompleteIndex = -1;
                 guessInputEl.focus();
             });
         }
@@ -677,9 +695,42 @@ guessInputEl.addEventListener("input", function() {
 });
 
 submitBtn.addEventListener("click", handleGuess);
+
+// Masaüstü Klavye Kısayolları (Yukarı/Aşağı/Enter/Esc)
 guessInputEl.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") handleGuess();
+    const selectableItems = Array.from(autocompleteListEl.querySelectorAll(".autocomplete-item:not(.already-guessed)"));
+
+    if (e.key === "ArrowDown" && selectableItems.length > 0) {
+        e.preventDefault();
+        activeAutocompleteIndex = (activeAutocompleteIndex + 1) % selectableItems.length;
+        updateAutocompleteHighlight(selectableItems);
+    } else if (e.key === "ArrowUp" && selectableItems.length > 0) {
+        e.preventDefault();
+        activeAutocompleteIndex = (activeAutocompleteIndex - 1 + selectableItems.length) % selectableItems.length;
+        updateAutocompleteHighlight(selectableItems);
+    } else if (e.key === "Escape") {
+        autocompleteListEl.innerHTML = "";
+        activeAutocompleteIndex = -1;
+    } else if (e.key === "Enter") {
+        if (activeAutocompleteIndex >= 0 && selectableItems[activeAutocompleteIndex]) {
+            e.preventDefault();
+            guessInputEl.value = selectableItems[activeAutocompleteIndex].textContent;
+            autocompleteListEl.innerHTML = "";
+            activeAutocompleteIndex = -1;
+        } else {
+            handleGuess();
+        }
+    }
 });
+
+// Sadece fare/klavye kullanılan masaüstünde vakaya geçince arama çubuğuna otomatik odaklan
+const originalSwitchCase = switchCase;
+switchCase = function(newIndex) {
+    originalSwitchCase(newIndex);
+    if (window.matchMedia("(pointer: fine)").matches && !guessInputEl.disabled) {
+        guessInputEl.focus();
+    }
+};
 
 // Oyunu Başlat
 initGame();
