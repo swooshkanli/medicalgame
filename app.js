@@ -761,13 +761,40 @@ const t = getAnimTimings();
     }
 }
 
+// Türkçe karakter ve büyük/küçük harf duyarsız arama normalleştirici
+function normalizeSearchText(text) {
+    return String(text || "")
+        .toLocaleLowerCase("tr-TR")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/ı/g, "i")
+        .trim();
+}
+
+// Hastalığın opsiyonel gizli arama isimlerini (aliases) diziye çevirir
+function getDiseaseAliases(disease) {
+    if (!disease.aliases) return [];
+    if (Array.isArray(disease.aliases)) return disease.aliases;
+    return String(disease.aliases).split(",").map(s => s.trim()).filter(Boolean);
+}
+
+// Girilen metnin hastalığın adına VEYA gizli aliases listesine uyup uymadığını kontrol eder
+function matchesDiseaseQuery(disease, normalizedQuery) {
+    if (normalizeSearchText(disease.name).includes(normalizedQuery)) return true;
+    return getDiseaseAliases(disease).some(alias => normalizeSearchText(alias).includes(normalizedQuery));
+}
+
+
 // Tahmin Gönderme İşlemi
 function handleGuess() {
     const state = caseStates[activeCaseIndex];
     if (state.status === "won" || state.status === "lost" || isTurnTransitioning) return;
 
-    const query = guessInputEl.value.trim().toLowerCase();
-    const matchedDisease = diseaseDB.find(d => d.name.toLowerCase() === query);
+const query = normalizeSearchText(guessInputEl.value);
+    const matchedDisease = diseaseDB.find(d =>
+        normalizeSearchText(d.name) === query ||
+        getDiseaseAliases(d).some(alias => normalizeSearchText(alias) === query)
+    );
 
     if (!matchedDisease) {
         guessInputEl.classList.remove("input-shake");
@@ -934,12 +961,20 @@ function updateAutocompleteHighlight(items) {
 }
 
 guessInputEl.addEventListener("input", function() {
-    const val = this.value.trim().toLowerCase();
+    const val = normalizeSearchText(this.value);
     autocompleteListEl.innerHTML = "";
     activeAutocompleteIndex = -1;
     if (!val) return;
 
-    const matches = diseaseDB.filter(d => d.name.toLowerCase().includes(val));
+    // Hem name hem gizli aliases içinde arar; doğrudan name ile başlayanları üstte gösterir
+    const matches = diseaseDB
+        .filter(d => matchesDiseaseQuery(d, val))
+        .sort((a, b) => {
+            const aStarts = normalizeSearchText(a.name).startsWith(val) ? 0 : 1;
+            const bStarts = normalizeSearchText(b.name).startsWith(val) ? 0 : 1;
+            return aStarts - bStarts;
+        });
+        
     matches.forEach(d => {
         const item = document.createElement("div");
         const isAlreadyGuessed = guessedHistory.some(guessed => guessed.id === d.id);
