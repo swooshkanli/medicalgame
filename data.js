@@ -13,7 +13,7 @@ const MEKANIZMA = {
     MEKANIK: "Mekanik / Obstrüktif",
     TRAVMATIK: "Travmatik",
     IDIYOPATIK: "İdiyopatik",
-    VASKULER: "Vasküler / İskemik",
+    VASKULER: "Vasküler",
     TOKSIK: "Toksik / İatrojenik",
     METABOLIK: "Metabolik / Endokrin",
     DEJENERATIF: "Dejeneratif",
@@ -493,13 +493,6 @@ const diseaseDB = [
         aliases: "Nefrolitiyazis, Renal Kolik, Böbrek Taşı, Taş",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.MEKANIK, secondary: MEKANIZMA.METABOLIK },
-        brans: { primary: BRANS.UROLOJI, secondary: BRANS.ACIL }
-    },
-    {
-        id: "testis_torsiyonu",
-        name: "Testis Torsiyonu",
-        seyir: SEYIR.AKUT,
-        mekanizma: { primary: MEKANIZMA.VASKULER, secondary: MEKANIZMA.MEKANIK },
         brans: { primary: BRANS.UROLOJI, secondary: BRANS.ACIL }
     },
     {
@@ -1016,7 +1009,7 @@ const diseaseDB = [
         aliases: "Beşinci Hastalık, Parvovirus B19, 5., 5. Hastalık, Eritema Enfeksiyozum",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null },
-        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.DERMATOLOJI }
+        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.PEDIATRI }
     },
     {
         id: "6_hastalik",
@@ -1024,7 +1017,7 @@ const diseaseDB = [
         aliases: "Altıncı Hastalık, HHV-6, HHV6, Herpes 6, 6., 6. Hastalık",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null },
-        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.DERMATOLOJI }
+        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.PEDIATRI }
     },
     {
         id: "kawasaki",
@@ -1456,7 +1449,7 @@ const diseaseDB = [
     {
         id: "hashimoto",
         name: "Hashimoto Tiroiditi",
-        aliases: "Hashimato, Haşimato, Haşimoto, Otoimmün Tiroidit",
+        aliases: "Hashimato, Haşimato, Haşimoto, Otoimmün Tiroidit, Hashimoto Hipotiroidisi",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.OTOIMMUN, secondary: MEKANIZMA.METABOLIK }, // Artmış TRH ile laktotrof uyarımı (sekonder hiperprolaktinemi) + Yorgunluk ve libido kaybı
         brans: { primary: BRANS.ENDOKRIN, secondary: null }
@@ -1493,6 +1486,206 @@ const diseaseDB = [
         brans: { primary: BRANS.ACIL, secondary: BRANS.ENDOKRIN }
     },
 
+
+
+// --- ÜROLOJİ & ANDROLOJİ PAKETİ ---
+    {
+        id: "varikosel",
+        name: "Varikosel",
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.VASKULER, secondary: MEKANIZMA.DEJENERATIF }, // Pampiniform pleksus venöz reflüsü -> Skrotal ısı artışı, spermatogenez ve Leydig disfonksiyonu
+        brans: { primary: BRANS.UROLOJI, secondary: null }
+    },
+    {
+        id: "testis_tumoru",
+        name: "Testis Tümörü",
+        aliases: ["Testiküler Germ Hücreli Tümör", "Seminom", "Koryokarsinom", "Testis Kanseri"],
+        seyir: SEYIR.SUBAKUT, // Genç erkekte ağrısız sert kitle + beta-hCG salgılayan tiplerde belirgin jinekomasti!
+        mekanizma: { primary: MEKANIZMA.MALIGNITE, secondary: MEKANIZMA.METABOLIK },
+        brans: { primary: BRANS.UROLOJI, secondary: null }
+    },
+    {
+        id: "peyronie",
+        name: "Peyronie Hastalığı",
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.INFLAMATUAR, secondary: MEKANIZMA.TRAVMATIK }, // Tekrarlayan mikrotravmalar sonrası tunica albugineada fibrotik plak -> Ağrılı ereksiyon, kurvatür, sekonder ED
+        brans: { primary: BRANS.UROLOJI, secondary: null }
+    },
+    {
+        id: "kronik_prostatit",
+        name: "Kronik Prostatit",
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.INFLAMATUAR, secondary: MEKANIZMA.ENFEKSIYOZ }, // Pelvik/perineal ağrı, dizüri, ejakülasyon sonrası ağrı ve sekonder cinsel isteksizlik
+        brans: { primary: BRANS.UROLOJI, secondary: BRANS.ENFEKSIYON }
+    },
+    {
+        id: "akut_prostatit",
+        name: "Akut Prostatit",
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR }, // Pelvik/perineal ağrı, dizüri, ejakülasyon sonrası ağrı ve sekonder cinsel isteksizlik
+        brans: { primary: BRANS.UROLOJI, secondary: BRANS.ENFEKSIYON }
+    },
+    {
+        id: "bph",
+        name: "Benign Prostat Hiperplazisi",
+        aliases: ["BPH", "İyi Huylu Prostat Büyümesi", "Prostat Hiperplazisi"],
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.DEJENERATIF, secondary: MEKANIZMA.METABOLIK }, // DHT aracılı transizyonel zon hiperplazisi -> Alt üriner sistem semptomları (AÜSS/LUTS)
+        brans: { primary: BRANS.UROLOJI, secondary: null }
+    },
+    {
+        id: "prostat_kanseri",
+        name: "Prostat Kanseri",
+        aliases: ["Prostat Adenokarsinomu"],
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.MALIGNITE, secondary: null }, // Periferik zon kaynaklı adenokarsinom -> Sert nodüler prostat, PSA artışı, kemik metastazı
+        brans: { primary: BRANS.UROLOJI, secondary: null }
+    },
+    {
+        id: "priapizm",
+        name: "Priapizm",
+        aliases: ["Uzamış Ağrılı Ereksiyon"],
+        seyir: SEYIR.AKUT, // >4 saat süren ağrılı ereksiyon -> Kavernozal kompartman sendromu, asidoz ve kalıcı ED riski
+        mekanizma: { primary: MEKANIZMA.VASKULER, secondary: null },
+        brans: { primary: BRANS.ACIL, secondary: BRANS.UROLOJI }
+    },
+    {
+        id: "testis_torsiyonu",
+        name: "Testis Torsiyonu",
+        aliases: ["Skrotal Torsiyon", "Spermatik Kord Torsiyonu", "Akut Skrotum Torsiyonu"],
+        seyir: SEYIR.AKUT, // Spermatik kordun dönmesi -> Ani şiddetli skrotal ağrı, kremaster refleksi kaybı, Prehn (-)
+        mekanizma: { primary: MEKANIZMA.VASKULER, secondary: MEKANIZMA.TRAVMATIK },
+        brans: { primary: BRANS.ACIL, secondary: BRANS.UROLOJI }
+    },
+    {
+        id: "epididimoorsit",
+        name: "Epididimoorşit",
+        aliases: ["Orşit", "Epididimit", "Kabakulak Orşiti"],
+        seyir: SEYIR.AKUT, // Asendan bakteriyel (E. coli, Chlamydia) veya viral enfeksiyon -> Skrotal ödem, ateş, Prehn (+)
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR },
+        brans: { primary: BRANS.UROLOJI, secondary: BRANS.ENFEKSIYON }
+    },
+
+
+    {
+        id: "erektil_disfonksiyon",
+        name: "Erektil Disfonksiyon",
+        aliases: ["İmpotans", "Sertleşme Bozukluğu", "İktidarsızlık", "ED"],
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.VASKULER, secondary: MEKANIZMA.METABOLIK }, // Kavernozal arter/endotel disfonksiyonu ve NO yolak bozukluğu
+        brans: { primary: BRANS.UROLOJI, secondary: BRANS.KARDIYOLOJI }
+    },
+
+    // --- SKROTAL ŞİŞLİK / KASIK DOLGUNLUĞU ÇELDİRİCİLERİ ---
+    {
+        id: "inguinal_herni",
+        name: "İnguinal Herni",
+        aliases: ["Kasık Fıtığı", "İndirekt İnguinal Herni", "Skrotal Herni"],
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.DEJENERATIF, secondary: MEKANIZMA.TRAVMATIK }, // Karın duvarı fasya zayıflığı -> Ayakta/ıkınmakla artan, yatınca redükte olan kasık-skrotal şişlik
+        brans: { primary: BRANS.GENEL_CERRAHI, secondary: BRANS.UROLOJI }
+    },
+    {
+        id: "hidrosel",
+        name: "Hidrosel",
+        aliases: ["Tunica Vaginalis Efüzyonu"],
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.DEJENERATIF, secondary: MEKANIZMA.INFLAMATUAR }, // Tunica vaginalis yaprakları arasında sıvı birikimi -> Ağrısız şişlik, transillüminasyon (+)
+        brans: { primary: BRANS.UROLOJI, secondary: null }
+    },
+    {
+        id: "spermatosel",
+        name: "Spermatosel",
+        aliases: ["Epididimal Kist", "Epididim Kisti"],
+        seyir: SEYIR.KRONIK,
+        mekanizma: { primary: MEKANIZMA.DEJENERATIF, secondary: null }, // Epididim başında sperm içeren benign retansiyon kisti -> Testis üst kutbunda ayrı palpe edilen kistik kitle
+        brans: { primary: BRANS.UROLOJI, secondary: null }
+    },
+
+
+
+    // --- ACİL TOKSİKOLOJİ & TOPLU BAŞVURU / KARBONMONOKSİT AYIRICI TANILARI ---
+    {
+        id: "karbonmonoksit_zehirlenmesi",
+        name: "Karbonmonoksit Zehirlenmesi",
+        aliases: ["CO Zehirlenmesi", "Soba Zehirlenmesi", "Baca Gazı Zehirlenmesi", "Karboksihemoglobinemi"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: null }, // Hb'ye ~240 kat yüksek afinite -> Oksihemoglobin eğrisinde sola kayma + Sitokrom c oksidaz inhibisyonu
+        brans: { primary: BRANS.ACIL, secondary: BRANS.NOROLOJI } // Hiperbarik/normobarik %100 O2 + Geç nöropsikiyatrik sekel riski
+    },
+    {
+        id: "gida_zehirlenmesi",
+        name: "Gıda Zehirlenmesi",
+        aliases: ["Besin Zehirlenmesi", "Stafilokok Enterotoksini", "Bacillus Cereus"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: MEKANIZMA.ENFEKSIYOZ }, // Preforme bakteriyel toksinler -> Aynı ortamda saatler içinde bulantı/kusma (3. turda Toksik YEŞİL yakarak güçlü çeldirici olur!)
+        brans: { primary: BRANS.ACIL, secondary: BRANS.ENFEKSIYON }
+    },
+    {
+        id: "influenza",
+        name: "İnfluenza",
+        aliases: ["Grip", "Mevsimsel Grip", "İnfluenza A", "İnfluenza B"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null }, // Kış aylarında apartman/aile içi toplu baş ağrısı ve bitkinlik -> CO'nun en sık yanlış tanısı
+        brans: { primary: BRANS.ENFEKSIYON, secondary: null }
+    },
+    {
+        id: "norovirus_gastroenteriti",
+        name: "Viral Gastroenterit",
+        aliases: ["Norovirüs", "Mide Üşütmesi", "Akut Gastroenterit", "Salgın İshal"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null }, // Kışın kapalı alanlarda/apartmanlarda hızla yayılan bulantı ve halsizlik salgını
+        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.GASTRO }
+    },
+    {
+        id: "botulizm",
+        name: "Botulizm",
+        aliases: ["Clostridium Botulinum"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: MEKANIZMA.ENFEKSIYOZ }, // Presinaptik ACh salınım bloğu -> Aile içi toplu başvuru, bulantı, desendan gevşek paralizi
+        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.NOROLOJI }
+    },
+    {
+        id: "metanol_zehirlenmesi",
+        name: "Metanol Zehirlenmesi",
+        aliases: ["Sahte İçki Zehirlenmesi", "Metil Alkol Zehirlenmesi", "Formik Asit"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: MEKANIZMA.METABOLIK }, // Toplu başvuru, baş ağrısı, bulantı, yüksek anyon açıklı metabolik asidoz ve görme kaybı
+        brans: { primary: BRANS.ACIL, secondary: null }
+    },
+    {
+        id: "siyanur_zehirlenmesi",
+        name: "Siyanür Zehirlenmesi",
+        aliases: ["Hidrojen Siyanür", "Yangın Dumanı İnhalasyonu"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: MEKANIZMA.METABOLIK }, // Sitokrom a3 bloğu -> Histotoksik hipoksi, şiddetli laktik asidoz, venöz kanda yüksek O2
+        brans: { primary: BRANS.ACIL, secondary: null }
+    },
+    {
+        id: "methemoglobinemi",
+        name: "Methemoglobinemi",
+        aliases: ["MetHb", "Lokal Anestezik Toksisitesi", "Nitrit Zehirlenmesi"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: MEKANIZMA.VASKULER }, // Fe2+ -> Fe3+ oksidasyonu -> Çikolata rengi kan, O2 ile düzelmeyen siyanoz ve ~%85'e sabitlenen SpO2
+        brans: { primary: BRANS.ACIL, secondary: BRANS.HEMATOLOJI }
+    },
+    {
+        id: "organofosfat_zehirlenmesi",
+        name: "Organofosfat Zehirlenmesi",
+        aliases: ["Tarım İlacı Zehirlenmesi", "Böcek İlacı Zehirlenmesi", "Kolinerjik Kriz"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: null }, // Asetilkolinesteraz inhibisyonu -> Ev/tarım maruziyeti, bulantı, miyozis, aşırı sekresyon
+        brans: { primary: BRANS.ACIL, secondary: BRANS.NOROLOJI }
+    },
+    {
+        id: "mantar_zehirlenmesi",
+        name: "Mantar Zehirlenmesi",
+        aliases: ["Amanita Phalloides", "Yabani Mantar Toksisitesi"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: null }, // Aile/komşu toplu başvurusu, baş dönmesi, bulantı ve gecikmiş hepatotoksisite
+        brans: { primary: BRANS.ACIL, secondary: BRANS.GASTRO }
+    },
+
 ];
 
 // 3. VAKA LİSTESİ
@@ -1517,13 +1710,13 @@ const casesDB = [
             {
                 turn: 4, // 3. Yanlışta açılır (SOL)
                 title: "Anamnez #2",
-                text: "Durumu ilk defa fark ettiğinde geceleri tuvalete kalkıp adım atarken acı duyduğunu ve biraz gezinip ancak ondan sonra geri yatabildiğini, sabahları pantolon ve çoraplarını giyerken zorlandığını belirtiyor. 2 aydır her sabah uyanır uyanmaz ağrı kesici aldığını, onların sayesinde daha iyi hissettiğini, aksi taktirde ağrıdan yürüyemeyeceğinden ve doğrulamayacağından korktuğunu söylüyor.",
+                text: "Durumu ilk defa fark ettiğinde geceleri tuvalete kalkıp adım atarken acı duyduğunu ve biraz gezinip ancak ondan sonra geri yatabildiğini, sabahları pantolon ve çoraplarını giyerken zorlandığını belirtiyor. 2 aydır her sabah uyanır uyanmaz ağrı kesici aldığını, onların sayesinde daha iyi hissettiğini, aksi takdirde ağrıdan yürüyemeyeceğinden ve doğrulamayacağından korktuğunu söylüyor.",
                 isAlert: false
             },
             {
                 turn: 5, // 4. Yanlışta açılır (SOL)
                 title: "Fizik Muayene ve Laboratuvar",
-                text: "Fizik muayenede göğüs kafesi nefes almakla olması gerekenden daha az hareket ediyor, omurgada ve kalça hareketleri için Schoeber ve FABER testlerinde ağrı ve kısıtlılık saptandı. Sağ ayakta topukta ve aşil tendonunun kalkaneusa yapışma bölgesinde hassasiyet, şişlik ve kızarıklık saptandı, sol taraf normal. Laboratuvar sonuçlarında CRP ve sedimantasyon hafif yüksek raporlandı.",
+                text: "Fizik muayenede göğüs kafesi nefes almakla olması gerekenden daha az hareket ediyor, omurgada ve kalça hareketleri için Schober ve FABER testlerinde ağrı ve kısıtlılık saptandı. Sağ ayakta topukta ve aşil tendonunun kalkaneusa yapışma bölgesinde hassasiyet, şişlik ve kızarıklık saptandı, sol taraf normal. Laboratuvar sonuçlarında CRP ve sedimantasyon hafif yüksek raporlandı.",
                 isAlert: false
             },
             {
@@ -1554,7 +1747,7 @@ const casesDB = [
             {
                 turn: 4, // 3. Yanlışta açılır (SOL)
                 title: "Fizik Muayene",
-                text: "Fizik muayenede sağ bacağın sol bacaktan belirgin daha şişmiş olduğu; sağda dizden ayak bileğine kadar uzanan bölgede ödem, hassasiyet, ısı artışı ve yaygın kızarıklık olduğu saptandı. Sağ inguinal lenf nodlarında büyüme görüldü. Vital bulgular: Ateş: 38.5°C, Nabız: 110/dk, TA: 110/80 mmHg, SpO2: %95.  ",
+                text: "Fizik muayenede sağ bacağın sol bacaktan belirgin daha şişmiş olduğu; sağda dizden ayak bileğine kadar uzanan bölgede belirsiz sınırlı ödem, hassasiyet, ısı artışı ve yaygın kızarıklık olduğu saptandı. Sağ inguinal lenf nodlarında büyüme görüldü. Vital bulgular: Ateş: 38.5°C, Nabız: 110/dk, TA: 110/80 mmHg, SpO2: %95.  ",
                 isAlert: false
             },
             {
@@ -1634,7 +1827,7 @@ const casesDB = [
             {
                 turn: 5, // 3. Yanlışta açılır
                 title: "Anamnez #2",
-                text: "İleri sorgulamada hasta 5 yıldan beri göbeğinde, göğsünde ve çene altında kendisini utandıracak derecede kıllanma artışının olduğunu ama bunları düzenli olarak aldığını; bu sorun için bir arkadaşının tavsiyesi üzerine doğum kontrol hapına başladığını ve o günden beri adetlerinin aralığının ergenlikten beri ilk defa adet aralıklarının belirgin derecede kısaldığını ancak 5 ay önce ilacı bıraktığından beri sadece bir kez adet gördüğünü belirtiyor.",
+                text: "İleri sorgulamada hasta 5 yıldan beri göbeğinde, göğsünde ve çene altında kendisini utandıracak derecede kıllanma artışının olduğunu ama bunları düzenli olarak aldığını; bu sorun için bir arkadaşının tavsiyesi üzerine doğum kontrol hapına başladığını ve o günden beri adetlerinin aralığının ergenlikten beri ilk defa belirgin derecede kısaldığını ancak 5 ay önce ilacı bıraktığından beri sadece bir kez adet gördüğünü belirtiyor.",
                 isAlert: false
             },
             {
@@ -1789,6 +1982,82 @@ const casesDB = [
                 turn: 7, // 6. Yanlışta açılır (Son Şans!)
                 title: "Laboratuvar & Spesifik Sonuçlar",
                 text: "Yüksek ateş döneminde 2 gün önce dış merkezde alınan tetkiklerde lökosit: 4.200/mm³ (%72 lenfosit hakimiyeti, hafif nötropeni) ve CRP: 0.6 mg/dL olarak sonuçlandı; tam idrar tahlili, boğaz hızlı antijen testi (-) ve kan kültürü steril raporlandı. Çalışılan viral PCR panelinde HHV-6 (+) saptandı.",
+                isAlert: true
+            }
+        ]
+    },
+
+{
+        caseNumber: "VAKA #9",
+        customSubTitle: "",
+        targetDiseaseId: "varikosel",
+        clues: [
+            {
+                turn: 1,
+                title: "İnspeksiyon / Triyaj",
+                text: "29 yaşında erkek hasta elinde birkaç dış merkez tahlil zarfıyla polikliniğe başvurdu. Genel durumu iyi, oldukça sağlıklı ve dinç görünüyor; muayene odasına otururken gergin bir ifadeyle sonuçlarını masaya bırakıyor.",
+                isAlert: false
+            },
+            {
+                turn: 2, // 1. Yanlışta açılır -> Oyuncuyu İnguinal Herni / Prostatit / Hidrosel'e çeker
+                title: "Anamnez",
+                text: "Hasta cerrah olduğunu ve son aylarda özellikle uzun ameliyat günlerinin sonunda kasığından aşağıya doğru yayılan, bıçak saplanır tarzda değil daha çok künt bir ağırlık ve çekilme hissi yaşadığını söylüyor. Bu rahatsızlığın eve gittiği geç saatlerde ve sıcak duş sonrası belirginleştiğini, gece sırtüstü uzandığında ise tamamen rahatladığını belirtiyor.",
+                isAlert: false
+            },
+            {
+                turn: 4, // 3. Yanlışta açılır -> İnfertilite burada devreye girer, enfeksiyon/ED dışlanır
+                title: "Anamnez #2",
+                text: "Asıl başvuru sebebinin bu ağrı olmadığını; 2.5 yıldır evli olduklarını, son 1.5 yıldır korunmamalarına rağmen çocuk sahibi olamadıklarını ve eşinin kadın doğum değerlendirmelerinin tamamen normal çıktığını ekliyor. Libidosu ve sabah ereksiyonları tamamen normal; idrarda yanma, kanama, üretral akıntı, ateş veya ejakülasyon sırasında ağrı tarif etmiyor.",
+                isAlert: false
+            },
+            {
+                turn: 5, // 4. Yanlışta açılır -> Endokrin/hipogonadizm dışlanır, progresif OAT görülür
+                title: "Rapor İnceleme",
+                text: "3 ay önceki spermiogramda %28 olan ileri hareketlilik son testte %16'ya, normal morfoloji %4'ten %2'ye gerilemiş; sperm konsantrasyonu 14 milyondan 8 milyon/mL'ye düşmüş. Hormon panelinde Total Testosteron: 4.9 ng/mL, FSH: 7.1 mIU/L, LH: 4.6 mIU/L ve Prolaktin: 9.2 ng/mL saptandı.",
+                isAlert: false
+            },
+            {
+                turn: 7, // 6. Yanlışta açılır (Son Şans!) -> Başlık içerikle uyumlu hale getirildi
+                title: "Fizik Muayene & Görüntüleme",
+                text: "Ayakta yapılan skrotal muayenede sol hemiskrotumun sağa göre daha sarkık olduğu; sol testis üzerinde belirgin, yumuşak ve kıvrıntılı yapıda dolgunluk palpe edildiği saptandı. Hasta sırtüstü yatırıldığında bu dolgunluğun belirgin şekilde gerilediği izlendi. Sol testis sağa kıyasla hafifçe küçük ve yumuşak kıvamlı; her iki testis parankiminde sert nodül veya kitle yok, transillüminasyon testi (-) ve her iki inguinal kanal intakt. Skrotal renkli Doppler USG'de sol pampiniform pleksus ven çapı istirahatte 3.4 mm, Valsalva ile 4.2 mm ölçüldü ve belirgin reflü ile genişleme lehine yorumlandı; sol testis hacmi sağdan 3 mL daha küçük raporlandı.",
+                isAlert: true
+            }
+        ]
+    },
+
+    {
+        caseNumber: "VAKA #10",
+        customSubTitle: "",
+        targetDiseaseId: "karbonmonoksit_zehirlenmesi",
+        clues: [
+            {
+                turn: 1,
+                title: "İnspeksiyon / Triyaj",
+                text: "Soğuk bir kış akşamında 32 yaşında kadın ve 35 yaşında erkek evli çift acil servise birlikte başvurdu. İkisi de solgun ve bitkin görünüyor; erkek karnını tutup yüzünü ekşitmiş, öne eğilmiş halde bekliyor. Kadın bir eliyle şakaklarını ovalarken diğer eliyle boş bir evcil kedi kafesi tutuyor.",
+                isAlert: false
+            },
+            {
+                turn: 2, // 1. Yanlışta açılır
+                title: "Anamnez",
+                text: "Çift, son 4-5 saattir ikisinde de eş zamanlı başlayan zonklayıcı baş ağrısı, sersemlik hissi, yoğun halsizlik ve bulantı olduğunu söylüyor. Bu şikayetlere ateş, boğaz ağrısı, öksürük veya ishal eşlik etmediğini belirtiyorlar. Normalde epey hareketli olan kedilerinin de aniden halsizleşip sürekli uyukladığını, gelirken onu da veterinere bıraktıklarını ekliyorlar.",
+                isAlert: false
+            },
+            {
+                turn: 4, // 3. Yanlışta açılır
+                title: "Anamnez #2",
+                text: "Kadın hasta son iki gündür dışarıdan ya da şüpheli bir şey yemediklerinden emin olduğunu söylüyor. Ayrıca acil koridorunda yaklaşık 40 dakikadır beklerken baş dönmesinin ve bulantısının hafifçe azaldığını fark ettiğini, dışarıdaki şiddetli fırtınaya rağmen kedisini merak ettiği için bir an önce çıkmak istediğini belirtiyor ve az önce karşı komşularını da acil sırasında gördüğünü ekliyor.",
+                isAlert: false
+            },
+            {
+                turn: 5, // 4. Yanlışta açılır
+                title: "Fizik Muayene",
+                text: "Kadın hastanın vital bulguları: TA: 118/74 mmHg, Nabız: 108/dk, Ateş: 36.6°C, Solunum: 20/dk, Parmak ucu SpO2: %99 (eşinin bulguları da benzer şekilde hafif taşikardik ve SpO2: %98). İki hastada da hafif dikkat dağınıklığı ve yanıt süresinde yavaşlama dışında fokal nörolojik defisit, ense sertliği veya görme kaybı yok; pupiller izokorik ve ışık refleksi (+). Akciğer sesleri doğal, batın rahat ve hassasiyet yok; ciltte siyanoz veya döküntü izlenmedi.",
+                isAlert: false
+            },
+            {
+                turn: 7, // 6. Yanlışta açılır (Son Şans!)
+                title: "Laboratuvar & Spesifik Sonuçlar",
+                text: "Ko-oksimetreli venöz kan gazında kadın hastada Karboksihemoglobin (COHb): %24 ve Laktat: 3.4 mmol/L; erkek hastada COHb: %21 ve Laktat: 2.8 mmol/L saptandı. EKG'de iskemik değişiklik olmaksızın sinüs taşikardisi izlendi, Troponin (-) sonuçlandı. Aynı dakikalarda değerlendirilen karşı komşularında da COHb: %27 gelmesi üzerine apartmanın acilen tahliye edilmesi için bildirim yapıldı.",
                 isAlert: true
             }
         ]
