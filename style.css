@@ -2388,3 +2388,61 @@ body {
         font-size: 0.56rem !important;
     }
 }
+
+
+/* ==========================================
+   AUTOCOMPLETE ALIAS ALT METİN (QoL)
+   ========================================== */
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 46px;
+    padding: 8px 14px;
+}
+
+.autocomplete-text-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+}
+
+.autocomplete-main-name {
+    line-height: 1.2;
+}
+
+.autocomplete-alias-hint {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #788896;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s ease;
+}
+
+/* Fareyle üzerine gelince hafifçe netleşir */
+.autocomplete-item:hover .autocomplete-alias-hint {
+    color: #9eb0c0;
+}
+
+/* Klavye ok tuşlarıyla turkuaz seçili hale gelince okunaklı kalır */
+.autocomplete-item.autocomplete-active .autocomplete-alias-hint {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Yatay telefon kompakt uyumu */
+@media screen and (max-height: 540px) and (orientation: landscape) {
+    .autocomplete-item {
+        min-height: 36px !important;
+        padding: 5px 10px !important;
+    }
+
+    .autocomplete-alias-hint {
+        font-size: 0.64rem !important;
+    }
+}

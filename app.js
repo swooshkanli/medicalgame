@@ -778,10 +778,63 @@ function getDiseaseAliases(disease) {
     return String(disease.aliases).split(",").map(s => s.trim()).filter(Boolean);
 }
 
-// Girilen metnin hastalığın adına VEYA gizli aliases listesine uyup uymadığını kontrol eder
-function matchesDiseaseQuery(disease, normalizedQuery) {
-    if (normalizeSearchText(disease.name).includes(normalizedQuery)) return true;
-    return getDiseaseAliases(disease).some(alias => normalizeSearchText(alias).includes(normalizedQuery));
+// Arama eşleşme kalitesini puanlar (Düşük puan = listede daha üstte)
+function getMatchScore(disease, normalizedQuery) {
+    const normName = normalizeSearchText(disease.name);
+    const nameWords = normName.split(/[\s/().,-]+/).filter(Boolean);
+    const aliases = getDiseaseAliases(disease).map(normalizeSearchText);
+
+    // 1. Asıl isim (name) önceliği
+    if (normName === normalizedQuery) return 0;
+    if (normName.startsWith(normalizedQuery)) return 10;
+    if (nameWords.some(w => w.startsWith(normalizedQuery))) return 20;
+
+    // 2. Gizli isim (alias) tam veya kelime başı eşleşmeleri
+    if (aliases.some(a => a === normalizedQuery)) return 30;
+    if (aliases.some(a => a.startsWith(normalizedQuery))) return 40;
+    if (aliases.some(a => a.split(/[\s/().,-]+/).some(w => w.startsWith(normalizedQuery)))) return 50;
+
+    // 3. Kelime ortasında geçen alt-metin eşleşmeleri (en son sırada)
+    const nameIdx = normName.indexOf(normalizedQuery);
+    if (nameIdx !== -1) return 60 + Math.min(nameIdx, 30) * 0.1;
+
+    let bestAliasIdx = Infinity;
+    for (const a of aliases) {
+        const idx = a.indexOf(normalizedQuery);
+        if (idx !== -1 && idx < bestAliasIdx) bestAliasIdx = idx;
+    }
+    if (bestAliasIdx !== Infinity) return 70 + Math.min(bestAliasIdx, 30) * 0.1;
+
+    return Infinity; // Eşleşme yok
+}
+
+const MIN_ALIAS_HINT_LENGTH = 3; // İstersen 2 yapabilirsin
+
+// Sadece ana isimde eşleşme YOKSA ve en az 3 karakter yazıldıysa, eşleşen en alakalı alias(lar)ı döndürür
+function getMatchedAliasHint(disease, normalizedQuery) {
+    if (normalizedQuery.length < MIN_ALIAS_HINT_LENGTH) return "";
+
+    // Ana isim zaten aranan harfleri içeriyorsa (örn: "viti" -> "Vitiligo") alt satır gösterme
+    if (normalizeSearchText(disease.name).includes(normalizedQuery)) return "";
+
+    const matched = getDiseaseAliases(disease)
+        .map(raw => {
+            const norm = normalizeSearchText(raw);
+            if (!norm.includes(normalizedQuery)) return null;
+
+            let rank = 3;
+            if (norm === normalizedQuery) rank = 0;
+            else if (norm.startsWith(normalizedQuery)) rank = 1;
+            else if (norm.split(/[\s/().,-]+/).some(w => w.startsWith(normalizedQuery))) rank = 2;
+
+            return { raw, rank };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.rank - b.rank)
+        .slice(0, 2) // En fazla 2 eşleşen alias göster ki satır taşmasın
+        .map(item => item.raw);
+
+    return matched.join(" · ");
 }
 
 
@@ -966,25 +1019,50 @@ guessInputEl.addEventListener("input", function() {
     activeAutocompleteIndex = -1;
     if (!val) return;
 
-    // Hem name hem gizli aliases içinde arar; doğrudan name ile başlayanları üstte gösterir
     const matches = diseaseDB
-        .filter(d => matchesDiseaseQuery(d, val))
+        .map(d => ({ disease: d, score: getMatchScore(d, val) }))
+        .filter(item => item.score < Infinity)
         .sort((a, b) => {
-            const aStarts = normalizeSearchText(a.name).startsWith(val) ? 0 : 1;
-            const bStarts = normalizeSearchText(b.name).startsWith(val) ? 0 : 1;
-            return aStarts - bStarts;
-        });
-        
+            if (a.score !== b.score) return a.score - b.score;
+            if (a.disease.name.length !== b.disease.name.length) {
+                return a.disease.name.length - b.disease.name.length;
+            }
+            return a.disease.name.localeCompare(b.disease.name, "tr-TR");
+        })
+        .map(item => item.disease);
+
     matches.forEach(d => {
         const item = document.createElement("div");
         const isAlreadyGuessed = guessedHistory.some(guessed => guessed.id === d.id);
+        const aliasHint = getMatchedAliasHint(d, val);
+
+        // Sol metin bloğu (Ana isim + varsa soluk alias alt satırı)
+        const textWrap = document.createElement("div");
+        textWrap.className = "autocomplete-text-wrap";
+
+        const mainNameEl = document.createElement("span");
+        mainNameEl.className = "autocomplete-main-name";
+        mainNameEl.textContent = d.name;
+        textWrap.appendChild(mainNameEl);
+
+        if (aliasHint) {
+            const aliasEl = document.createElement("span");
+            aliasEl.className = "autocomplete-alias-hint";
+            aliasEl.textContent = aliasHint;
+            textWrap.appendChild(aliasEl);
+        }
+
+        item.appendChild(textWrap);
 
         if (isAlreadyGuessed) {
             item.className = "autocomplete-item already-guessed";
-            item.innerHTML = `<span>${d.name}</span> <span class="guessed-badge">Denenmiş Tanı</span>`;
+            const badgeEl = document.createElement("span");
+            badgeEl.className = "guessed-badge";
+            badgeEl.textContent = "Denenmiş Tanı";
+            item.appendChild(badgeEl);
         } else {
             item.className = "autocomplete-item";
-            item.textContent = d.name;
+            item.dataset.name = d.name; // Klavye ile Enter seçiminde sadece temiz ismi alır
             item.addEventListener("click", function() {
                 guessInputEl.value = d.name;
                 autocompleteListEl.innerHTML = "";
@@ -992,6 +1070,7 @@ guessInputEl.addEventListener("input", function() {
                 guessInputEl.focus();
             });
         }
+
         autocompleteListEl.appendChild(item);
     });
 });
@@ -1015,7 +1094,7 @@ guessInputEl.addEventListener("keydown", function(e) {
     } else if (e.key === "Enter") {
         e.preventDefault();
         if (activeAutocompleteIndex >= 0 && selectableItems[activeAutocompleteIndex]) {
-            guessInputEl.value = selectableItems[activeAutocompleteIndex].textContent;
+            guessInputEl.value = selectableItems[activeAutocompleteIndex].dataset.name;
             autocompleteListEl.innerHTML = "";
             activeAutocompleteIndex = -1;
         } else {

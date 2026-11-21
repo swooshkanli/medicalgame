@@ -95,6 +95,7 @@ const diseaseDB = [
     {
         id: "primer_sifiliz",
         name: "Primer Sifiliz",
+        aliases: "Treponoma Pallidum",
         seyir: SEYIR.SUBAKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null },
         brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.DERMATOLOJI }
@@ -102,6 +103,7 @@ const diseaseDB = [
     {
         id: "sekonder_sifiliz",
         name: "Sekonder Sifiliz",
+        aliases: "Treponoma Pallidum",
         seyir: SEYIR.SUBAKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null },
         brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.DERMATOLOJI }
@@ -109,6 +111,7 @@ const diseaseDB = [
     {
         id: "norosifiliz",
         name: "Nörosifiliz",
+        aliases: "Treponoma Pallidum",
         seyir: SEYIR.SUBAKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null },
         brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.NOROLOJI }
@@ -170,7 +173,7 @@ const diseaseDB = [
     {
         id: "ailevi_akdeniz_atesi",
         name: "Ailevi Akdeniz Ateşi",
-        aliases: "FMF",
+        aliases: "FMF, AAA",
         seyir: SEYIR.KRONIK_AKUT,
         mekanizma: { primary: MEKANIZMA.INFLAMATUAR, secondary: null },
         brans: { primary: BRANS.ROMATOLOJI, secondary: null }
@@ -344,7 +347,7 @@ const diseaseDB = [
     {
         id: "asetaminofen_toksisitesi",
         name: "Asetaminofen İntoksikasyonu",
-        aliases: "Parol, Parasetamol, Parasetamol Zehirlenmesi",
+        aliases: "Parol İntoksikasyonu, Parol Zehirlenmesi, Parasetamol İntoksikasyonu, Parasetamol Zehirlenmesi",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: MEKANIZMA.METABOLIK },
         brans: { primary: BRANS.ACIL, secondary: BRANS.GASTRO }
@@ -362,7 +365,7 @@ const diseaseDB = [
     {
         id: "graves_hastaligi",
         name: "Graves Hastalığı",
-        aliases: "Basedow",
+        aliases: "Basedow Graves Hastalığı",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.OTOIMMUN, secondary: MEKANIZMA.METABOLIK },
         brans: { primary: BRANS.ENDOKRIN, secondary: null }
@@ -385,7 +388,7 @@ const diseaseDB = [
     {
         id: "feokromositoma",
         name: "Feokromositoma",
-        aliases: "Feo, Pheochrom",
+        aliases: "Pheochromositoma",
         seyir: SEYIR.KRONIK_AKUT,
         mekanizma: { primary: MEKANIZMA.METABOLIK, secondary: MEKANIZMA.MALIGNITE },
         brans: { primary: BRANS.ENDOKRIN, secondary: BRANS.GENEL_CERRAHI }
@@ -433,6 +436,7 @@ const diseaseDB = [
     {
         id: "myastenia_gravis",
         name: "Myastenia Gravis",
+        aliases: "MG",
         seyir: SEYIR.KRONIK_AKUT,
         mekanizma: { primary: MEKANIZMA.OTOIMMUN, secondary: null },
         brans: { primary: BRANS.NOROLOJI, secondary: BRANS.GOGUS_CERRAHISI }
@@ -561,7 +565,7 @@ const diseaseDB = [
     {
         id: "miyofasiyal_agri_sendromu",
         name: "Miyofasial Ağrı Sendromu",
-        aliases: "MAS",
+        aliases: "MAS, Myofasial Ağrı Sendromu",
         seyir: SEYIR.KRONIK_AKUT,
         mekanizma: { primary: MEKANIZMA.MEKANIK, secondary: null },
         brans: { primary: BRANS.FTR, secondary: null }
@@ -598,7 +602,7 @@ const diseaseDB = [
     {
         id: "b12_eksikligi_anemisi",
         name: "Vitamin B12 Eksikliği",
-        aliases: "B12 Vitamin Eksikliği, B12 Eksikliği, Pernisiyöz Anemi, Pernisiyoz Anemi",
+        aliases: "B12 Vitamin Eksikliği, B12 Eksikliği, Pernisiyöz Anemi, Pernisiyoz Anemi, Kobalamin Eksikliği Anemisi",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.METABOLIK, secondary: MEKANIZMA.OTOIMMUN },
         brans: { primary: BRANS.HEMATOLOJI, secondary: BRANS.GASTRO }
@@ -759,7 +763,7 @@ const diseaseDB = [
     {
         id: "kll",
         name: "Kronik Lenfositer Lösemi",
-        aliases: "KLL",
+        aliases: "KLL, SLL",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.MALIGNITE, secondary: null },
         brans: { primary: BRANS.HEMATOLOJI, secondary: BRANS.ONKOLOJI }
@@ -767,7 +771,7 @@ const diseaseDB = [
     {
         id: "sacli_hucreli_losemi",
         name: "Saçlı Hücreli Lösemi",
-        aliases: "Hairy Cell",
+        aliases: "Hairy Cell Lösemi, Tüylü Hücreli Lösemi",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.MALIGNITE, secondary: null },
         brans: { primary: BRANS.HEMATOLOJI, secondary: BRANS.ONKOLOJI }
@@ -775,6 +779,7 @@ const diseaseDB = [
     {
         id: "hodgkin_lenfoma",
         name: "Hodgkin Lenfoma",
+        aliases: "HL",
         seyir: SEYIR.SUBAKUT,
         mekanizma: { primary: MEKANIZMA.MALIGNITE, secondary: null },
         brans: { primary: BRANS.ONKOLOJI, secondary: BRANS.HEMATOLOJI }
@@ -782,7 +787,7 @@ const diseaseDB = [
     {
         id: "non_hodgkin_lenfoma",
         name: "Non-Hodgkin Lenfoma",
-        aliases: "NHL",
+        aliases: "NHL, HDL",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.MALIGNITE, secondary: null },
         brans: { primary: BRANS.ONKOLOJI, secondary: BRANS.HEMATOLOJI }
@@ -798,7 +803,7 @@ const diseaseDB = [
     {
         id: "enfeksiyoz_mononukleoz",
         name: "Enfeksiyöz Mononükleoz",
-        aliases: "EBV, Epstein Barr, İnfeksiyoz Mononükleoz",
+        aliases: "EBV, Epstein Barr Virüs Enfeksiyonu, İnfeksiyoz Mononükleoz",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR },
         brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.HEMATOLOJI }
@@ -821,7 +826,7 @@ const diseaseDB = [
     {
         id: "miyelodisplastik_sendrom",
         name: "Miyelodisplastik Sendrom",
-        aliases: "MDS",
+        aliases: "MDS, Myelodisplastik Sendrom",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.KLONAL, secondary: null },
         brans: { primary: BRANS.HEMATOLOJI, secondary: null }
@@ -912,7 +917,7 @@ const diseaseDB = [
     {
         id: "polimyaljiya_romatika",
         name: "Polimyaljiya Romatika",
-        aliases: "PMR",
+        aliases: "PMR, Polimiyaljiya Romatika",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.INFLAMATUAR, secondary: null },
         brans: { primary: BRANS.ROMATOLOJI, secondary: null }
@@ -924,6 +929,7 @@ const diseaseDB = [
     {
         id: "bruselloz",
         name: "Bruselloz",
+        aliases: "Brucella Enfeksiyonu, Brucelloz",
         seyir: SEYIR.KRONIK_AKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR },
         brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.ROMATOLOJI }
@@ -931,7 +937,7 @@ const diseaseDB = [
     {
         id: "sitma",
         name: "Malarya",
-        aliases: "Sıtma, Malaria, Falciparum, Vivax, Ovale, Plasmodium",
+        aliases: "Sıtma, Plasmodium Malaria, Plasmodium Falciparum, Plasmodium Vivax, Plasmodium Ovale, Plasmodium",
         seyir: SEYIR.SUBAKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null },
         brans: { primary: BRANS.ENFEKSIYON, secondary: null }
@@ -966,7 +972,8 @@ const diseaseDB = [
     },
     {
         id: "riketsiyoz",
-        name: "Riketsiyoz (Akdeniz Benekli Ateşi)",
+        name: "Riketsiyoz",
+        aliases: "Akdeniz Benekli Ateşi, Riketsiya Enfeksiyonu, Rickettsia Enfeksiyonu",
         seyir: SEYIR.SUBAKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.VASKULER },
         brans: { primary: BRANS.ENFEKSIYON, secondary: null }
@@ -1140,6 +1147,7 @@ const diseaseDB = [
     {
         id: "akut_piyelonefrit",
         name: "Akut Piyelonefrit",
+        aliases: "Akut Pyelonefrit",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR },
         brans: { primary: BRANS.NEFROLOJI, secondary: BRANS.ENFEKSIYON }
@@ -1203,7 +1211,8 @@ const diseaseDB = [
     },
     {
         id: "primer_over_yetmezligi",
-        name: "Primer Over Yetmezliği (Erken Menopoz)",
+        name: "Primer Over Yetmezliği",
+        aliases: "Erken Menopoz",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.DEJENERATIF, secondary: MEKANIZMA.OTOIMMUN }, // Folikül havuzunun erken tükenmesi + Otoimmün ooforit zemini
         brans: { primary: BRANS.KADIN_DOGUM, secondary: BRANS.ENDOKRIN }
@@ -1211,7 +1220,7 @@ const diseaseDB = [
     {
         id: "plummervinson",
         name: "Plummer-Vinson Sendromu",
-        aliases: "Paterson-Brown-Kelly Sendromu, Plummer Winson, Plumer Winson, Plumer Vinson",
+        aliases: "Paterson-Brown-Kelly Sendromu, Plummer Winson Sendromu, Plumer Winson Sendromu, Plumer Vinson Sendromu",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.METABOLIK, secondary: MEKANIZMA.MEKANIK }, // Ağır demir/nütrisyonel eksiklik + Mukozal atrofi ve fibrotik web gelişimi
         brans: { primary: BRANS.GASTRO, secondary: BRANS.HEMATOLOJI } // Disfaji/Endoskopik dilatasyon + Demir eksikliği anemisi
@@ -1233,7 +1242,7 @@ const diseaseDB = [
     {
         id: "diffuz_ozofagus_spazmi",
         name: "Diffüz Özofageal Spazm",
-        aliases: "DÖS, DES, Özefageal Spazm, Özafageal Spazm",
+        aliases: "DÖS, DES, Diffüz Özefageal Spazm, Diffüz Özafageal Spazm",
         seyir: SEYIR.KRONIK_AKUT, // Kronik dismotilite zemininde anjina pektorisi taklit eden akut göğüs ağrısı atakları!
         mekanizma: { primary: MEKANIZMA.DEJENERATIF, secondary: MEKANIZMA.MEKANIK }, // Koordine olmayan spastik kontraksiyonlar + Nöromüsküler disfonksiyon
         brans: { primary: BRANS.GASTRO, secondary: null }
@@ -1249,7 +1258,7 @@ const diseaseDB = [
     {
         id: "barrett_ozofagusu",
         name: "Barrett Özofagusu",
-        aliases: "Baret, Barrett, Barett, Barret, Özafagus Barrett, Özefagus Barrett",
+        aliases: "Baret Özofagusu, Barrett Özofagusu, Barett Özofagusu, Barret Özofagusu, Barrett Özafagusu, Barrett Özefagusu",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.DEJENERATIF, secondary: MEKANIZMA.MALIGNITE }, // Kronik asit hasarına sekonder intestinal metaplazi + Adenokarsinom prekürsörü
         brans: { primary: BRANS.GASTRO, secondary: BRANS.ONKOLOJI }
@@ -1257,7 +1266,7 @@ const diseaseDB = [
     {
         id: "ozofagus_kanseri",
         name: "Özofagus Kanseri",
-        aliases: "Özefagus Kanseri, Özafagus Kanseri, Adenokarsiom Özofagus, Skuamöz Karsinom Özofagus",
+        aliases: "Özefagus Kanseri, Özafagus Kanseri, Özofagus Adenokarsiomu, Özofagus Skuamöz Hücreli Karsinomu",
         seyir: SEYIR.SUBAKUT, // Haftalar-aylar içinde hızla ilerleyen (katıdan sıvıya) mekanik disfaji ve ağır kilo kaybı
         mekanizma: { primary: MEKANIZMA.MALIGNITE, secondary: null },
         brans: { primary: BRANS.ONKOLOJI, secondary: BRANS.GASTRO }
@@ -1265,7 +1274,7 @@ const diseaseDB = [
     {
         id: "candida_ozofajiti",
         name: "Candida Özofajiti",
-        aliases: "Candida albicans özefajiti, candida özafajiti",
+        aliases: "Candida Özefajiti, Candida Özafajiti",
         seyir: SEYIR.AKUT, // Veya SUBAKUT; şiddetli odinofaji (yutarken ağrı) ile başvurur
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR }, // Fırsatçı fungal enfeksiyon + İmmünsüpresyon / İnhaler steroid zemini
         brans: { primary: BRANS.GASTRO, secondary: BRANS.ENFEKSIYON }
@@ -1273,7 +1282,7 @@ const diseaseDB = [
     {
         id: "eozinofilik_ozofajit",
         name: "Eozinofilik Özofajit",
-        aliases: "eozinofilik özefajit, eosinofilik özofajit, özonofilik özafajit",
+        aliases: "Eozinofilik Özefajit, Eosinofilik Özofajit, Özonofilik Özafajit",
         seyir: SEYIR.KRONIK_AKUT, // Kronik atopik/alerjik zemin + Akut gıda takılması (food impaction) acili ile başvuru!
         mekanizma: { primary: MEKANIZMA.ALERJIK, secondary: MEKANIZMA.INFLAMATUAR }, // Th2/Alerjik immün yanıt + Trakealize (halkalı) özofagus inflamasyonu
         brans: { primary: BRANS.GASTRO, secondary: null } // Veya varsa ALLERJI / IMMUNOLOJI
@@ -1289,7 +1298,7 @@ const diseaseDB = [
     {
         id: "mallory_weiss_sendromu",
         name: "Mallory-Weiss Sendromu",
-        aliases: "Malory Weiss, Mallory Veiss",
+        aliases: "Malory Weiss Sendromu, Mallory Veiss Sendromu",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.TRAVMATIK, secondary: MEKANIZMA.VASKULER }, // Şiddetli öğürme/kusmaya bağlı gastroözofageal bileşkede longitudinal mukozal yırtık + Üst GİS kanaması
         brans: { primary: BRANS.ACIL, secondary: BRANS.GASTRO }
@@ -1312,7 +1321,7 @@ const diseaseDB = [
     {
         id: "sjogren",
         name: "Sjögren Sendromu",
-        aliases: "Keratokonjunktivitis sicca",
+        aliases: "Keratokonjunktivitis Sicca",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.OTOIMMUN, secondary: MEKANIZMA.INFLAMATUAR }, // Anti-SSA (Ro) / Anti-SSB (La) aracılı otoimmün ekzokrin bez yıkımı ve lenfositik infiltrasyon
         brans: { primary: BRANS.ROMATOLOJI, secondary: null } // Veya varsa GOZ / KBB
@@ -1331,7 +1340,8 @@ const diseaseDB = [
     },
     {
         id: "tinea_versikolor",
-        name: "Tinea Versikolor (Pitriyazis Versikolor)",
+        name: "Tinea Versikolor",
+        aliases: "Pitriyazis Versikolor",
         seyir: SEYIR.KRONIK, // Yaz aylarında sık tekrarlayan kronik yüzeyel mikoz (Seyir yeşil yanarak oyuncuyu 3. tura kadar şaşırtır!)
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null }, // Malassezia furfur + Azelaik asit ile melanogenez inhibisyonu
         brans: { primary: BRANS.DERMATOLOJI, secondary: BRANS.ENFEKSIYON }
@@ -1413,7 +1423,8 @@ const diseaseDB = [
     },
     {
         id: "primer_hipogonadizm",
-        name: "Primer Hipogonadizm (Testiküler Yetmezlik)",
+        name: "Primer Hipogonadizm",
+        aliases: "Testiküler Yetmezlik",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.METABOLIK, secondary: MEKANIZMA.DEJENERATIF }, // Hipergonadotropik hipogonadizm (yüksek LH/FSH, düşük testosteron)
         brans: { primary: BRANS.UROLOJI, secondary: BRANS.ENDOKRIN }
@@ -1421,6 +1432,7 @@ const diseaseDB = [
     {
         id: "klinefelter",
         name: "Klinefelter Sendromu",
+        aliases: "Kleinefelter Sendromu",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.GENETIK, secondary: MEKANIZMA.METABOLIK }, // Seminifer tübül disgenezi -> Küçük sert testisler, jinekomasti, seyrek kıllanma
         brans: { primary: BRANS.ENDOKRIN, secondary: BRANS.UROLOJI }
@@ -1428,6 +1440,7 @@ const diseaseDB = [
     {
         id: "kallmann",
         name: "Kallmann Sendromu",
+        aliases: "Kalmann Sendromu, Kalman Sendromu, Kallman Sendromu",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.GENETIK, secondary: MEKANIZMA.METABOLIK }, // GnRH nöron göç defekti -> Konjenital hipogonadotropik hipogonadizm + Anozmi
         brans: { primary: BRANS.ENDOKRIN, secondary: BRANS.NOROLOJI }
@@ -1443,7 +1456,7 @@ const diseaseDB = [
     {
         id: "hashimoto",
         name: "Hashimoto Tiroiditi",
-        aliases: "Hashimato, Haşimato, Haşimoto, Otoimmün tiroidit",
+        aliases: "Hashimato, Haşimato, Haşimoto, Otoimmün Tiroidit",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.OTOIMMUN, secondary: MEKANIZMA.METABOLIK }, // Artmış TRH ile laktotrof uyarımı (sekonder hiperprolaktinemi) + Yorgunluk ve libido kaybı
         brans: { primary: BRANS.ENDOKRIN, secondary: null }
@@ -1459,7 +1472,7 @@ const diseaseDB = [
     {
         id: "iyot_eksikligi_hipotiroidisi",
         name: "İyot Eksikliği Hipotiroidisi",
-        aliases: "Guatr İyot",
+        aliases: "İyot Eksikliği Guatr",
         seyir: SEYIR.KRONIK,
         mekanizma: { primary: MEKANIZMA.METABOLIK, secondary: null }, // Tiroid hormon sentezi için substrat eksikliği -> Kompansatuar TSH artışı ve guatr
         brans: { primary: BRANS.ENDOKRIN, secondary: null }
@@ -1467,7 +1480,7 @@ const diseaseDB = [
     {
         id: "ilac_induklu_hipotiroidi",
         name: "İlaç İndüklü Hipotiroidi",
-        aliases: "Guatr İlaç",
+        aliases: "İlaç İndüklü Guatr",
         seyir: SEYIR.SUBAKUT, // İlaç başlanmasını takip eden haftalar-aylar içinde hormon sentez/salınım bloğu (Wolff-Chaikoff etkisi vb.)
         mekanizma: { primary: MEKANIZMA.TOKSIK, secondary: MEKANIZMA.METABOLIK },
         brans: { primary: BRANS.ENDOKRIN, secondary: null }
