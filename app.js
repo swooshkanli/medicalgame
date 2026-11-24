@@ -1,24 +1,18 @@
-// Aktif Vaka Seçimi
-let activeCaseIndex = 0;
+// Kayıtlı tüm vaka durumlarını ve son aktif vakayı yükle
+const caseStates = CaseStorage.hydrateCaseStates(casesDB, diseaseDB);
+let activeCaseIndex = CaseStorage.getLastActiveCaseIndex(casesDB);
+
 let currentCaseData = casesDB[activeCaseIndex];
 let targetDisease = diseaseDB.find(d => d.id === currentCaseData.targetDiseaseId);
 
 const maxGuesses = gameConfig.maxGuesses; // 7
 
-// HER VAKANIN DURUMUNU TUTAN OTURUM HAFIZASI (Sayfa yenilenene kadar korunur)
-const caseStates = casesDB.map(() => ({
-    wrongGuesses: 0,
-    guessedHistory: [],
-    status: "unplayed", // "unplayed" | "playing" | "won" | "lost"
-    isGameWon: false,
-    finalAttemptCount: null
-}));
-
-let wrongGuesses = 0;
-let guessedHistory = [];
-let isGameWon = false;
+let wrongGuesses = caseStates[activeCaseIndex].wrongGuesses;
+let guessedHistory = [...caseStates[activeCaseIndex].guessedHistory];
+let isGameWon = caseStates[activeCaseIndex].isGameWon;
 let isTurnTransitioning = false;
 let activeAutocompleteIndex = -1;
+
 
 // Zamanlayıcı ve aktif kaydırma (scroll) yöneticisi
 let activeTimeouts = [];
@@ -156,11 +150,12 @@ const attemptCounterEl = document.getElementById("attempt-counter");
 const inputWrapperEl = document.querySelector(".input-wrapper");
 const inputSectionEl = document.querySelector(".input-section");
 
-function syncStateToMemory() {
+function syncStateToMemory(forceStorageStatus = null) {
     const state = caseStates[activeCaseIndex];
     state.wrongGuesses = wrongGuesses;
     state.guessedHistory = [...guessedHistory];
     state.isGameWon = isGameWon;
+    CaseStorage.saveActiveRun(currentCaseData, state, forceStorageStatus);
 }
 
 // Vaka Seçici Butonları (2. Satırda kompakt)
@@ -187,6 +182,7 @@ function renderCaseSelector() {
 
     casesDB.forEach((c, idx) => {
         const st = caseStates[idx];
+        const cr = st.career || {};
         const btn = document.createElement("button");
         btn.className = "case-btn";
         btn.textContent = idx + 1;
@@ -195,11 +191,32 @@ function renderCaseSelector() {
         if (st.status === "won") btn.classList.add("case-won");
         if (st.status === "lost") btn.classList.add("case-lost");
 
-        btn.title = `${c.caseNumber} (${
-            st.status === "won" ? "Çözüldü ✓" :
+        // Daha önce çözülmüş ama şu an restart atılıp tekrar oynanıyorsa belli et
+        if (cr.everWon && st.status !== "won") {
+            btn.classList.add("case-ever-won");
+        }
+
+        const statusText =
+            st.status === "won" ? `Çözüldü ✓ (${st.finalAttemptCount}/${maxGuesses})` :
             st.status === "lost" ? "Devredildi ✕" :
-            st.guessedHistory.length > 0 ? "Devam Ediyor..." : "Oynanmadı"
-        })`;
+            st.guessedHistory.length > 0 ? "Devam Ediyor..." : "Oynanmadı";
+
+        const historyParts = [];
+        if (cr.firstRunCompleted) {
+            historyParts.push(
+                cr.firstRunOutcome === "won"
+                    ? `İlk sefer: ${cr.firstRunAttempts}/${maxGuesses}`
+                    : "İlk sefer: Devredildi"
+            );
+        }
+        if (cr.everWon && cr.bestAttempts !== null) {
+            historyParts.push(`En iyi: ${cr.bestAttempts}/${maxGuesses}`);
+        }
+        if (cr.restartCount > 0) {
+            historyParts.push(`${cr.restartCount} tekrar`);
+        }
+
+        btn.title = `${c.caseNumber} · ${statusText}` + (historyParts.length ? ` | ${historyParts.join(" · ")}` : "");
 
         btn.addEventListener("click", () => {
             if (activeCaseIndex !== idx) {
@@ -214,14 +231,20 @@ function renderCaseSelector() {
 // Vakalar Arası Geçiş Fonksiyonu
 function switchCase(newIndex) {
     clearActiveTimeouts();
-    const prevState = caseStates[activeCaseIndex];
+const prevState = caseStates[activeCaseIndex];
     if (prevState.status === "won" && !prevState.isGameWon) {
         prevState.isGameWon = true;
         const maxClueTurn = Math.max(...currentCaseData.clues.map(c => c.turn));
         prevState.wrongGuesses = Math.max(prevState.wrongGuesses, maxClueTurn - 1);
+        CaseStorage.saveActiveRun(currentCaseData, prevState, "won");
+    } else if (prevState.wrongGuesses >= maxGuesses && prevState.status !== "lost" && prevState.status !== "won") {
+        prevState.status = "lost";
+        prevState.finalAttemptCount = maxGuesses;
+        CaseStorage.saveActiveRun(currentCaseData, prevState, "lost");
     }
 
     activeCaseIndex = newIndex;
+    CaseStorage.setLastActiveCase(casesDB[activeCaseIndex]);
     currentCaseData = casesDB[activeCaseIndex];
     targetDisease = diseaseDB.find(d => d.id === currentCaseData.targetDiseaseId);
 
@@ -282,11 +305,13 @@ function initGame(isSwitchingCase = false) {
         mainTitleEl.textContent = currentCaseData.caseNumber;
     }
 
-    updateAttemptBadge();
+updateAttemptBadge();
     renderCaseSelector();
+    renderCaseCareerBar();
 
     const isFreshCase = (guessedHistory.length === 0 && state.status === "unplayed");
-    renderClues(isFreshCase, !isFreshCase && isSwitchingCase, false);
+    renderClues(isFreshCase, !isFreshCase, false);
+
     renderMatrix(false, false, false);
 
     const existingBanner = document.getElementById("end-phase-banner");
@@ -657,32 +682,31 @@ function showEndBanner(isWin, diagnosisName, isStaticRestore = false, deferAnim 
                 <h4>✓ TANI DOĞRULANDI: ${diagnosisName.toUpperCase()}</h4>
                 <p>Klinik tablo aydınlatıldı. Hastanın tedavi protokolünü belirleyin.</p>
             </div>
-            <button class="next-phase-btn" id="start-treatment-btn">Tedavi Fazına Geç ➔</button>
+            <div class="banner-actions">
+                <button class="next-phase-btn" id="start-treatment-btn">Tedavi Fazına Geç ➔</button>
+                <button class="replay-case-btn" id="replay-case-btn" title="Kayıtlı çözümün korunarak vakayı tekrar oyna">Tekrar Oyna ↻</button>
+            </div>
         `;
+        registerTimeout(() => {
+            const replayBtn = document.getElementById("replay-case-btn");
+            if (replayBtn) replayBtn.addEventListener("click", restartCurrentCase);
+        }, 0);
     } else {
         bannerDiv.innerHTML = `
             <div class="banner-text">
                 <h4>✕ VAKA DEVREDİLDİ</h4>
                 <p>Doğru Tanı: <strong>${diagnosisName}</strong></p>
             </div>
-            <button class="next-phase-btn" id="retry-case-btn" style="background:#37474f; border-color:#78909c; box-shadow:none;">Bu Vakayı Sıfırla ↻</button>
+            <div class="banner-actions">
+                <button class="next-phase-btn" id="retry-case-btn" style="background:#37474f; border-color:#78909c; box-shadow:none;">Tekrar Dene ↻</button>
+            </div>
         `;
         registerTimeout(() => {
             const retryBtn = document.getElementById("retry-case-btn");
-            if (retryBtn) {
-                retryBtn.addEventListener("click", () => {
-                    caseStates[activeCaseIndex] = {
-                        wrongGuesses: 0,
-                        guessedHistory: [],
-                        status: "unplayed",
-                        isGameWon: false,
-                        finalAttemptCount: null
-                    };
-                    switchCase(activeCaseIndex);
-                });
-            }
+            if (retryBtn) retryBtn.addEventListener("click", restartCurrentCase);
         }, 0);
     }
+    
 
     inputWrapperEl.appendChild(bannerDiv);
     return bannerDiv;
@@ -703,6 +727,7 @@ const t = getAnimTimings();
         isGameWon = true;
         syncStateToMemory();
         renderCaseSelector();
+        renderCaseCareerBar();
 
         attemptCounterEl.classList.remove("badge-warning", "badge-danger");
         attemptCounterEl.classList.add("badge-win");
@@ -893,7 +918,8 @@ const query = normalizeSearchText(guessInputEl.value);
 
         state.finalAttemptCount = Math.min(wrongGuesses + 1, maxGuesses);
         state.status = "won";
-        syncStateToMemory();
+        state.career = CaseStorage.recordOutcome(currentCaseData, true, state.finalAttemptCount);
+        syncStateToMemory("won");
 
         if (portraitMode) {
             renderMatrix(true, true, true);
@@ -919,11 +945,13 @@ const query = normalizeSearchText(guessInputEl.value);
     const isDefeat = (wrongGuesses >= maxGuesses);
     const newClueUnlocked = currentCaseData.clues.some(c => c.turn === wrongGuesses + 1);
 
-    if (isDefeat) {
-        guessInputEl.disabled = true;
-        submitBtn.disabled = true;
-        state.finalAttemptCount = maxGuesses;
-    }
+if (isDefeat) {
+      guessInputEl.disabled = true;
+      submitBtn.disabled = true;
+      state.finalAttemptCount = maxGuesses;
+      state.career = CaseStorage.recordOutcome(currentCaseData, false, maxGuesses);
+      syncStateToMemory("lost");
+  }
 
     if (portraitMode) {
         isTurnTransitioning = true;
@@ -960,6 +988,7 @@ const query = normalizeSearchText(guessInputEl.value);
                             state.status = "lost";
                             syncStateToMemory();
                             renderCaseSelector();
+                            renderCaseCareerBar();
 
                             attemptCounterEl.classList.remove("badge-warning", "badge-danger");
                             attemptCounterEl.classList.add("badge-lost");
@@ -973,7 +1002,7 @@ const query = normalizeSearchText(guessInputEl.value);
                                 void bannerEl.offsetWidth;
                                 isTurnTransitioning = false;
                             }, "center");
-                        }, 1380);
+                        }, getAnimTimings().revealDone);
                     } else {
                         registerTimeout(() => { isTurnTransitioning = false; }, 120);
                     }
@@ -990,6 +1019,7 @@ const query = normalizeSearchText(guessInputEl.value);
                 state.status = "lost";
                 syncStateToMemory();
                 renderCaseSelector();
+                renderCaseCareerBar();
 
                 attemptCounterEl.classList.remove("badge-warning", "badge-danger");
                 attemptCounterEl.classList.add("badge-lost");
@@ -1102,6 +1132,66 @@ guessInputEl.addEventListener("keydown", function(e) {
         }
     }
 });
+
+
+// Önceden çözülmüş / tekrar oynanan vakalarda üstte zarif bir kariyer özeti gösterir
+function renderCaseCareerBar() {
+    const panelHeaderEl = document.querySelector(".panel-header");
+    if (!panelHeaderEl) return;
+
+    let bar = document.getElementById("case-career-bar");
+    if (!bar) {
+        bar = document.createElement("div");
+        bar.id = "case-career-bar";
+        bar.className = "case-career-bar";
+        panelHeaderEl.appendChild(bar);
+    }
+
+    const st = caseStates[activeCaseIndex];
+    const cr = st.career || {};
+    const chips = [];
+
+    if (cr.everWon && st.status !== "won") {
+        chips.push(`<span class="career-chip chip-ever-won">✓ Önceden Çözüldü (En iyi: ${cr.bestAttempts}/${maxGuesses})</span>`);
+    } else if (cr.firstRunCompleted && cr.firstRunOutcome === "won") {
+        chips.push(`<span class="career-chip chip-first">İlk çözüm: ${cr.firstRunAttempts}/${maxGuesses}</span>`);
+    } else if (cr.firstRunCompleted && cr.firstRunOutcome === "lost") {
+        chips.push(`<span class="career-chip chip-lost-hist">İlk deneme: Devredildi</span>`);
+    }
+
+    if (cr.restartCount > 0) {
+        chips.push(`<span class="career-chip chip-restart">Tekrar: ${cr.restartCount}</span>`);
+    }
+
+    bar.innerHTML = chips.join("");
+    bar.style.display = chips.length > 0 ? "flex" : "none";
+}
+
+
+function restartCurrentCase() {
+    clearActiveTimeouts();
+    const updatedCareer = CaseStorage.recordRestart(currentCaseData);
+    caseStates[activeCaseIndex] = {
+        caseKey: CaseStorage.getCaseKey(currentCaseData),
+        wrongGuesses: 0,
+        guessedHistory: [],
+        status: "unplayed",
+        isGameWon: false,
+        finalAttemptCount: null,
+        career: updatedCareer
+    };
+
+    wrongGuesses = 0;
+    guessedHistory = [];
+    isGameWon = false;
+    initGame(true);
+
+    if (isPortraitScrollMode()) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (window.matchMedia("(pointer: fine)").matches && !guessInputEl.disabled) {
+        guessInputEl.focus();
+    }
+}
 
 // Oyunu Başlat
 initGame();

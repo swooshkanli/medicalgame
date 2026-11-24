@@ -219,7 +219,7 @@ const diseaseDB = [
     },
     {
         id: "pulmoner_emboli",
-        name: "Pulmoner Tromboemboli",
+        name: "Pulmoner Emboli",
         seyir: SEYIR.AKUT,
         mekanizma: { primary: MEKANIZMA.VASKULER, secondary: null },
         brans: { primary: BRANS.GOGUS, secondary: BRANS.ACIL }
@@ -979,6 +979,45 @@ const diseaseDB = [
         mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.VASKULER },
         brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.ACIL }
     },
+
+    // Mevcut riketsiyoz kaydının aliases satırını şu şekilde zenginleştirebilirsin:
+    // aliases: "Akdeniz Benekli Ateşi, Riketsiya Enfeksiyonu, Rickettsia Enfeksiyonu, Rickettsia Conorii, Kayalık Dağlar Benekli Ateşi, RMSF, Tifüs",
+
+    // --- RİKETSİYOZ & ESKAR / SUBAKUT ZOONOZ EK AYIRICI TANILARI ---
+    {
+        id: "tularemi",
+        name: "Tularemi",
+        aliases: ["Francisella Tularensis", "Tavşan Ateşi", "Ülseroglandüler Tularemi"],
+        seyir: SEYIR.SUBAKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR }, // Kene/su/hayvan teması + Ülser/eskar + Rejyonel LAP ve beta-laktama yanıtsız ateş
+        brans: { primary: BRANS.ENFEKSIYON, secondary: null }
+    },
+    {
+        id: "sarbon",
+        name: "Kütanöz Şarbon",
+        aliases: ["Şarbon", "Antraks", "Bacillus Anthracis", "Malign Püstül"],
+        seyir: SEYIR.AKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.TOKSIK }, // Ağrısız siyah nekrotik eskarın (tache noire) en klasik ayırıcı tanısı
+        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.DERMATOLOJI }
+    },
+    {
+        id: "q_atesi",
+        name: "Q Ateşi",
+        aliases: ["Coxiella Burnetii", "Q Humması"],
+        seyir: SEYIR.SUBAKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null }, // Hayvan teması + Şiddetli baş ağrısı, beta-laktama yanıtsız ateş ve transaminaz yüksekliği
+        brans: { primary: BRANS.ENFEKSIYON, secondary: null }
+    },
+    {
+        id: "tifo",
+        name: "Tifo",
+        aliases: ["Salmonella Typhi", "Karahumma", "Enterik Ateş"],
+        seyir: SEYIR.SUBAKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null }, // Basamaklı yükselen ateş, baş ağrısı ve gövdede soluk pembe gül lekeleri (rose spots)
+        brans: { primary: BRANS.ENFEKSIYON, secondary: BRANS.GASTRO }
+    },
+
+
     {
         id: "kizil",
         name: "Kızıl",
@@ -1160,7 +1199,22 @@ const diseaseDB = [
         brans: { primary: BRANS.DERMATOLOJI, secondary: BRANS.ACIL }
     },
 
-
+{
+        id: "kedi_tirmigi",
+        name: "Kedi Tırmığı Hastalığı",
+        aliases: ["Bartonella Henselae", "Bartonelloz", "Cat Scratch Disease"],
+        seyir: SEYIR.SUBAKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: MEKANIZMA.INFLAMATUAR }, // İnokülasyon papülü sonrası haftalar içinde gelişen granülomatöz lenfadenit
+        brans: { primary: BRANS.ENFEKSIYON, secondary: null }
+    },
+    {
+        id: "toksoplazmoz",
+        name: "Toksoplazmoz",
+        aliases: ["Toxoplasma Gondii", "Toksoplazma"],
+        seyir: SEYIR.SUBAKUT,
+        mekanizma: { primary: MEKANIZMA.ENFEKSIYOZ, secondary: null }, // Kedi dışkısı / çiğ et teması -> Halsizlik, baş ağrısı, servikal LAP
+        brans: { primary: BRANS.ENFEKSIYON, secondary: null }
+    },
 
 
     //KADIN DOĞUM
@@ -2061,5 +2115,84 @@ const casesDB = [
                 isAlert: true
             }
         ]
+    },
+
+
+    {
+        caseNumber: "VAKA #11",
+        customSubTitle: "",
+        targetDiseaseId: "riketsiyoz",
+        clues: [
+            {
+                turn: 1,
+                title: "İnspeksiyon / Triyaj",
+                text: "Sıcak bir yaz gününde 46 yaşında erkek hasta oldukça bitkin ve terli halde polikliniğe başvurdu. Yürürken ağır hareket ettiği, kısa kollu tişörtünün altından ön kollarında ve el bileklerinde dağınık pembe lekeler bulunduğu dikkat çekiyor.",
+                isAlert: false
+            },
+            {
+                turn: 2, // 1. Yanlışta açılır
+                title: "Anamnez",
+                text: "Hasta yaklaşık 6 gündür giderek yükselen ateş, zonklayıcı baş ağrısı, şiddetli baldır ve sırt ağrıları yaşadığını söylüyor. 3 gün önce dış merkezde üst solunum yolu enfeksiyonu düşünülerek ateş düşürücü ve amoksisilin-klavulanat başlandığını ancak ateşinin hiç düşmediğini; son 2 gündür ise önce bileklerinden başlayıp vücuduna yayılan döküntüler çıktığını belirtiyor.",
+                isAlert: false
+            },
+            {
+                turn: 4, // 3. Yanlışta açılır
+                title: "Anamnez #2",
+                text: "Detaylı sorgulamada hastanın 2 hafta önce bahçeli yazlık evlerine gittiği, orada yeni sahiplendikleri köpeğin bakımını yaptığı ve çevredeki çalılık alanlarda yürüyüşlere çıktığı öğrenildi. Korunmasız cinsel temas öyküsü, yakın zamanda diş tedavisi veya yurt dışı seyahati bulunmuyor; antibiyotiğe rağmen ateşinin günlerdir 39°C civarında seyrettiği ve döküntülerin kaşıntılı olmadığı belirtiliyor.",
+                isAlert: false
+            },
+            {
+                turn: 5, // 4. Yanlışta açılır
+                title: "Fizik Muayene",
+                text: "Vital bulgular: Ateş: 39.2°C, Nabız: 104/dk, TA: 112/70 mmHg. Ense sertliği yok, kalpte üfürüm duyulmadı. Gövde ve ekstremitelerde yaygın, avuç içlerini ve ayak tabanlarını da tutan, basmakla kısmen solan makülopapüler döküntüler saptandı; lezyonların halka veya hedef tahtası görünümünde olmadığı izlendi. Hastanın kendisinin de fark etmediği sağ diz arkasında, etrafı kızarık bir halka ile çevrili, yaklaşık 5 mm çapında ağrısız ve siyah kabuklu nekrotik bir odak saptandı; sağ kasıkta ağrısız lenf nodları palpe edildi.",
+                isAlert: false
+            },
+            {
+                turn: 7, // 6. Yanlışta açılır (Son Şans!)
+                title: "Laboratuvar & Spesifik Sonuçlar",
+                text: "Laboratuvarda Trombosit: 94.000/mm³, Sodyum: 131 mEq/L, AST: 118 U/L, ALT: 134 U/L ve CRP: 14.2 mg/dL saptandı. Kan kültürleri steril; VDRL/RPR (-), KKKA PCR (-) ve Borrelia antikorları (-) sonuçlandı. İndirekt immünofloresan testinde Rickettsia conorii IgM (+) ve siyah kabuk sürüntüsünden çalışılan PCR'da Rickettsia DNA (+) doğrulandı.",
+                isAlert: true
+            }
+        ]
+    },
+
+    {
+        caseNumber: "VAKA #12",
+        customSubTitle: "",
+        targetDiseaseId: "wilson_hastaligi",
+        clues: [
+            {
+                turn: 1,
+                title: "İnspeksiyon / Triyaj",
+                text: "19 yaşında erkek hasta, oldukça gergin ve öfkeli görünen anne-babasıyla birlikte polikliniğe başvurdu. Hasta görüşme boyunca yer yer anlamsız şekilde gülümsüyor, cümlelerini hafifçe geveleyerek konuşuyor ve ağzının kenarında biriken tükürüğü sık sık peçeteyle siliyor; otururken ellerini cebinden çıkarmıyor.",
+                isAlert: false
+            },
+            {
+                turn: 2, // 1. Yanlışta açılır
+                title: "Anamnez",
+                text: "Ailesi son 8 aydır oğullarının üniversite başarısının dibe vurduğunu, eskiden oldukça sakin ve uyumlu biriyken son dönemde ani öfke patlamaları ve duygusal dengesizlikler yaşamaya başladığını söylüyor. Anne, mimarlık öğrencisi olan oğlunun artık çizim yapamadığını, el yazısının giderek küçülüp okunmaz hale geldiğini ve yemek yerken çatalı ağzına götürmekte zorlandığını ekliyor. Aile bu değişimin gizli madde kullanımından veya ağır bir psikiyatrik hastalıktan kaynaklandığından şüpheleniyor.",
+                isAlert: false
+            },
+            {
+                turn: 4, // 3. Yanlışta açılır
+                title: "Anamnez #2",
+                text: "Detaylı sorgulamada hastanın hiçbir antipsikotik, antidepresan, alkol veya keyif verici madde kullanmadığı kesinleştirildi. Yaklaşık 1.5 yıl önce spor lisansı için yaptırdığı rutin kan tahlilinde karaciğer enzimlerinin hafifçe yüksek çıktığı ancak o dönem 'yağlanma olabilir' denilerek takip edilmediği; son 2 ayda ise birkaç kez sabahları idrarının koyulaştığı ve çabuk yorulmaya başladığı öğrenildi. Ebeveynlerinin akraba olduğu, hastanın ablasının ise ergenlik döneminde nedeni tam aydınlatılamayan karaciğer yetmezliği nedeniyle kaybedildiği belirtildi.",
+                isAlert: false
+            },
+            {
+                turn: 5, // 4. Yanlışta açılır
+                title: "Fizik Muayene",
+                text: "Vital bulgular normal. Nörolojik muayenede hafif dizartri, ağız kenarında salya artışı, kollar öne uzatılıp dirsekler büküldüğünde belirginleşen kaba ve kanat çırpar tarzda tremor ile üst ekstremitelerde dişli çark rijiditesi saptandı; kas gücü ve derin duyu normal. Skleralarda çok hafif sarılık mevcut, batın muayenesinde karaciğer kot altında 2 cm ele geliyor ve dalak hafifçe palpe ediliyor. Gözde her iki korneanın dış kenarı boyunca üst ve alt kadranda altın-kahverengi pigment halkası izlendi.",
+                isAlert: false
+            },
+            {
+                turn: 7, // 6. Yanlışta açılır (Son Şans!)
+                title: "Laboratuvar & Spesifik Sonuçlar",
+                text: "Laboratuvarda Hb: 10.4 g/dL, Direkt Coombs (-), AST: 94 U/L, ALT: 68 U/L, ALP: 28 U/L ve serum seruloplazmin: 7 mg/dL (çok düşük) saptandı; 24 saatlik idrarda bakır atılımı belirgin derecede yüksek (260 mcg) raporlandı. Beyin MR'ında bilateral lentiform nükleuslarda ve mezensefalonda simetrik T2 hiperintensitesi izlendi; genetik analizde ATP7B gen mutasyonu doğrulandı.",
+                isAlert: true
+            }
+        ]
     }
+
+
 ];

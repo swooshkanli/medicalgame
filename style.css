@@ -2446,3 +2446,88 @@ body {
         font-size: 0.64rem !important;
     }
 }
+
+
+/* ==========================================
+   KARİYER & TEKRAR OYNAMA GÖSTERGELERİ
+   ========================================== */
+.case-btn {
+    position: relative;
+}
+
+/* Önceden çözülmüş ama şu an restart atılmış vaka göstergesi */
+.case-btn.case-ever-won {
+    border-color: rgba(76, 175, 80, 0.7) !important;
+}
+
+.case-btn.case-ever-won::after {
+    content: "";
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4caf50;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.9);
+}
+
+.case-career-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.career-chip {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #b0bec5;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.career-chip.chip-ever-won {
+    background: rgba(76, 175, 80, 0.14);
+    color: #81c784;
+    border-color: rgba(76, 175, 80, 0.35);
+}
+
+.career-chip.chip-first {
+    background: rgba(77, 208, 225, 0.12);
+    color: #80deea;
+    border-color: rgba(77, 208, 225, 0.3);
+}
+
+.career-chip.chip-lost-hist {
+    background: rgba(239, 83, 80, 0.12);
+    color: #ef9a9a;
+    border-color: rgba(239, 83, 80, 0.3);
+}
+
+.banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.replay-case-btn {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    color: #cfd8dc;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.replay-case-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
